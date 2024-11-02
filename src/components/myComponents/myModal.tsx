@@ -17,10 +17,11 @@ const MyModal: React.FC<ModalProps> = ({
   };
 
   const [name, setName] = useState("");
+  const [answers, setAnswers] = useState<string[]>(Array(4).fill(""));
+
   const [selectedFormType, setSelectedFormType] = useState<FormInterface>(
     formTypes[0]
   );
-  const [answers, setAnswers] = useState<string[]>(Array(4).fill(""));
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedForm = formTypes.find(
@@ -33,7 +34,7 @@ const MyModal: React.FC<ModalProps> = ({
 
   const handleAnswerChange = (
     index: number,
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     const newAnswers = [...answers];
     newAnswers[index] = event.target.value;
@@ -52,11 +53,11 @@ const MyModal: React.FC<ModalProps> = ({
 
   return (
     <>
-      <button className="btn w-40 h-10" onClick={openModal}>
+      <button className="btn w-40 h-10 font-sans" onClick={openModal}>
         {openButtonLabel}
       </button>
       <dialog id="my_modal_1" className="modal">
-        <div className="modal-box w-full max-w-2xl">
+        <div className="modal-box w-full max-w-2xl h-fill">
           <h1 className="font-bold text-xl mb-2">{title}</h1>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="flex space-x-4">
@@ -95,9 +96,8 @@ const MyModal: React.FC<ModalProps> = ({
               (question, index) => (
                 <label className="block" key={index}>
                   <span className="text-sm">{question}</span>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full mt-1"
+                  <textarea
+                    className="textarea textarea-md textarea-bordered w-full mt-1 h-24"
                     placeholder={`Answer question ${index + 1}`}
                     value={answers[index]}
                     onChange={(e) => handleAnswerChange(index, e)}

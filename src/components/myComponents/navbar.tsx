@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
   };
 
   return (
-    <div className="navbar bg-base-100 h-14">
+    <div className="navbar bg-base-200 h-14">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">

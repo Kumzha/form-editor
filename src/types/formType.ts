@@ -1,28 +1,36 @@
+export interface FormQuestion {
+  sub_title: string;
+  prompt?: string;
+}
+
+export interface FormPoint {
+  title: string;
+  subpoints: FormQuestion[];
+}
+
 export interface SubPoint {
   content: string;
 }
 
 export interface Point {
-  title: string;
-  prompt?: string;
-  subpoints: SubPoint[];
+  subpoints?: SubPoint[];
 }
 
 export interface FormInterface {
   name: string;
   initial_context_questions: string[];
-  questions: Point[];
+  questions: FormPoint[];
 }
 
 export interface Form {
   form_type: FormInterface;
   name: string;
   initial_context: string[];
-  points: Point[];
+  points?: Point[];
 }
 
 export const exampleFormInterface: FormInterface = {
-  name: "Example Form ",
+  name: "Example Form Interface",
 
   initial_context_questions: [
     "Hello, this is an example form.",
@@ -35,26 +43,51 @@ export const exampleFormInterface: FormInterface = {
     {
       title: "The First Point",
       subpoints: [
-        { content: "subpoint 1.1" },
-        { content: "subpoint 1.2" },
-        { content: "subpoint 1.3" },
+        { sub_title: "Subpoint 1.1" },
+        { sub_title: "Subpoint 1.2" },
+        { sub_title: "Subpoint 1.3" },
       ],
     },
     {
       title: "The Second Point",
       subpoints: [
-        { content: "subpoint 2.1" },
-        { content: "subpoint 2.2" },
-        { content: "subpoint 2.3" },
+        { sub_title: "Subpoint 2.1" },
+        { sub_title: "Subpoint 2.2" },
+        { sub_title: "Subpoint 2.3" },
       ],
     },
     {
       title: "The Third Point",
+      subpoints: [{ sub_title: "Subpoint 3.1" }],
+    },
+    {
+      title: "The Fourth Point",
       subpoints: [
-        { content: "subpoint 3.1" },
-        { content: "subpoint 3.2" },
-        { content: "subpoint 3.3" },
+        { sub_title: "Subpoint 4.1" },
+        { sub_title: "Subpoint 4.2" },
+        { sub_title: "Subpoint 4.3" },
+        { sub_title: "Subpoint 4.4" },
       ],
     },
+    {
+      title: "The Fifth Point",
+      subpoints: [
+        { sub_title: "Subpoint 5.1" },
+        { sub_title: "Subpoint 5.2" },
+        { sub_title: "Subpoint 5.3" },
+        { sub_title: "Subpoint 5.4" },
+        { sub_title: "Subpoint 5.5" },
+      ],
+    },
+  ],
+};
+export const exampleForm: Form = {
+  form_type: exampleFormInterface,
+  name: "Example Form",
+  initial_context: [
+    "First answer.",
+    "Second answer.",
+    "Third answer.",
+    "Fourth answer.",
   ],
 };

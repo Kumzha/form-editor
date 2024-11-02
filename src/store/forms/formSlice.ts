@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Form } from "@/types/formType";
+import { Form, exampleForm } from "@/types/formType";
 
 export interface UserForms {
   userForms: Form[];
+  selectedForm: Form | null;
 }
 
+// TODO mock data
 const initialState: UserForms = {
-  userForms: [],
+  userForms: [exampleForm],
+  selectedForm: null,
 };
 
 const userFormsSlice = createSlice({
@@ -28,9 +31,12 @@ const userFormsSlice = createSlice({
     clearForms(state) {
       state.userForms = [];
     },
+    setSelectedForm(state, action: PayloadAction<Form>) {
+      state.selectedForm = action.payload;
+    },
   },
 });
 
-export const { addForm, updateForm, clearForms, deleteForm } =
+export const { addForm, updateForm, clearForms, deleteForm, setSelectedForm } =
   userFormsSlice.actions;
 export default userFormsSlice.reducer;
