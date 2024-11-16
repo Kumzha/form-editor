@@ -1,28 +1,31 @@
-import { FormPoint, Point } from "@/types/formType";
 import React from "react";
-import { Form } from "@/types/formType";
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import clasicSubpoint from "./clasicSubpoint";
+import { useSelector } from "react-redux";
+import ClasicSubpoint from "./clasicSubpoint";
 import { RootState } from "@/store/store";
 
-interface PointFieldProps {
-  selectedPoint: FormPoint;
-  setSubpoint: (subpoint: number) => void;
-}
+const PointField = () => {
+  const { selectedForm, selectedPoint } = useSelector(
+    (state: RootState) => state.userForms
+  );
 
-const PointField: React.FC<PointFieldProps> = ({
-  selectedPoint,
-  setSubpoint,
-}) => {
-  const { selectedForm } = useSelector((state: RootState) => state.userForms);
+  const formSubpoints =
+    selectedForm?.form_type.questions[selectedPoint].subpoints;
 
   return (
-    <div>
-      <h1>{selectedPoint.title}</h1>
-      {selectedPoint.subpoints.map((subpoint, key) => (
-        <div key={key}>{subpoint.sub_title}</div>
-      ))}
+    <div className="max-h-[600px] overflow-auto scrollbar-hide">
+      <h3 className="font-semibold text-center">
+        {selectedForm?.form_type.questions[selectedPoint].title}
+      </h3>
+      {/* SUBPOINTS */}
+      <div className="flex flex-col gap-4">
+        {formSubpoints ? (
+          formSubpoints.map((subpoint, key) => (
+            <ClasicSubpoint key={key} index={key} question={subpoint} />
+          ))
+        ) : (
+          <></>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,21 +1,28 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Form, exampleForm } from "@/types/formType";
+import { Form, creaForm } from "@/types/formType";
 
 export interface UserForms {
   userForms: Form[];
   selectedForm: Form | null;
+  selectedPoint: number;
+  selectedSubpoint: number;
 }
 
 // TODO mock data
 const initialState: UserForms = {
-  userForms: [exampleForm],
+  userForms: [creaForm],
   selectedForm: null,
+  selectedPoint: 0,
+  selectedSubpoint: 0,
 };
 
 const userFormsSlice = createSlice({
   name: "userForms",
   initialState,
   reducers: {
+    setUserForms(state, action: PayloadAction<Form[]>) {
+      state.userForms = action.payload;
+    },
     addForm(state, action: PayloadAction<Form>) {
       state.userForms.push(action.payload);
     },
@@ -33,10 +40,39 @@ const userFormsSlice = createSlice({
     },
     setSelectedForm(state, action: PayloadAction<Form>) {
       state.selectedForm = action.payload;
+      state.selectedPoint = 0;
+      state.selectedSubpoint = 0;
+    },
+    setSelectedPoint(state, action: PayloadAction<number>) {
+      state.selectedPoint = action.payload;
+      state.selectedSubpoint = 0;
+    },
+    setSelectedSubpoint(state, action: PayloadAction<number>) {
+      state.selectedSubpoint = action.payload;
+    },
+    updateSelectedSubpoint(state, action: PayloadAction<string>) {
+      if (
+        state.selectedForm?.points?.[state.selectedPoint]?.subpoints?.[
+          state.selectedSubpoint
+        ]
+      ) {
+        state.selectedForm.points[state.selectedPoint].subpoints[
+          state.selectedSubpoint
+        ].content = action.payload;
+      }
     },
   },
 });
 
-export const { addForm, updateForm, clearForms, deleteForm, setSelectedForm } =
-  userFormsSlice.actions;
+export const {
+  addForm,
+  updateForm,
+  clearForms,
+  deleteForm,
+  setSelectedForm,
+  setSelectedPoint,
+  setSelectedSubpoint,
+  setUserForms,
+  updateSelectedSubpoint,
+} = userFormsSlice.actions;
 export default userFormsSlice.reducer;

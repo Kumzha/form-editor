@@ -1,62 +1,44 @@
 "use client";
-import { useState } from "react";
 import Navbar from "@/components/myComponents/navbar";
 import { RootState } from "@/store/store";
 import DropDown from "@/components/myComponents/dropDown";
 import MyModal from "@/components/myComponents/myModal";
-import { exampleFormInterface, FormInterface } from "@/types/formType";
-import { useDispatch, useSelector } from "react-redux";
-import { Form } from "@/types/formType";
+import { FormInterface, creaFormInterface } from "@/types/formType";
+import { useSelector } from "react-redux";
 import FormPoints from "@/components/myComponents/formPoints";
-import { setSelectedForm } from "@/store/forms/formSlice";
 import PointField from "@/components/myComponents/pointField";
+import InputField from "@/components/myComponents/inputField";
 
 export default function Home() {
-  const dispatch = useDispatch();
-
-  const handleSetSelectedForm = (form: Form) => {
-    dispatch(setSelectedForm(form));
-  };
-
   const { isSignedIn } = useSelector((state: RootState) => state.user);
 
   const { userForms, selectedForm } = useSelector(
     (state: RootState) => state.userForms
   );
 
-  const formTypes: FormInterface[] = [exampleFormInterface];
-
-  const [pointIndex, setPointIndex] = useState<number>(1);
-  const [subpointIndex, setSubpointIndex] = useState<number>(1);
+  const formTypes: FormInterface[] = [creaFormInterface];
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="max-h-screen h-screen flex flex-col">
       <Navbar userSignedIn={isSignedIn} />
       <div className="container mx-auto p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <DropDown forms={userForms} setSelectedForm={handleSetSelectedForm} />
+          <DropDown forms={userForms} />
           <MyModal
             title="Fill out the information about your form"
             openButtonLabel="New Form"
             formTypes={formTypes}
           />
         </div>
-        <FormPoints
-          selectedForm={selectedForm}
-          setPointIndex={setPointIndex}
-          selectedPoint={pointIndex}
-        />
+        <FormPoints selectedForm={selectedForm} />
       </div>
       {selectedForm && (
-        <div className="container mx-auto p-4 flex flex-grow h-full gap-40 mb-5 bg-red-300">
-          <div className="bg-red-500" style={{ flexBasis: "35%" }}>
-            a
+        <div className="container mx-auto flex flex-grow gap-20 mb-5 max-h-[726px]">
+          <div className="ml-5" style={{ flexBasis: "40%" }}>
+            <InputField />
           </div>
-          <div className="bg-red-500" style={{ flexBasis: "65%" }}>
-            <PointField
-              setSubpoint={setSubpointIndex}
-              selectedPoint={selectedForm.form_type.questions[pointIndex]}
-            />
+          <div className="mr-5" style={{ flexBasis: "60%" }}>
+            <PointField />
           </div>
         </div>
       )}

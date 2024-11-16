@@ -1,17 +1,22 @@
 import React from "react";
 import { Form } from "@/types/formType";
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedPoint } from "@/store/forms/formSlice";
+import { RootState } from "@/store/store";
 
 interface FormPointProps {
   selectedForm: Form | null;
-  setPointIndex: (index: number) => void;
-  selectedPoint: number | null;
 }
 
-const FormPoints: React.FC<FormPointProps> = ({
-  selectedForm,
-  setPointIndex,
-  selectedPoint,
-}) => {
+const FormPoints: React.FC<FormPointProps> = ({ selectedForm }) => {
+  const { selectedPoint } = useSelector((state: RootState) => state.userForms);
+
+  const dispatch = useDispatch();
+
+  const setPointIndex = (index: number) => {
+    dispatch(setSelectedPoint(index));
+  };
+
   if (!selectedForm) {
     return <></>;
   }
