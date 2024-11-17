@@ -11,12 +11,14 @@ interface DropDownProps {
   forms: Form[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformToFormObject(backendObj: any): Form {
   const form: Form = {
     form_id: backendObj._id, // Map _id to form_id
     form_type: creaFormInterface, // Map form_template_name to form_type
     name: backendObj.name,
     initial_context: backendObj.initial_context,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     points: backendObj.data.map((pointData: any[]) => ({
       subpoints: pointData.map((item: string) => ({
         content: item, // Every element in the pointData is a subpoint
@@ -48,7 +50,7 @@ const fetchForms = async (): Promise<Form[]> => {
 
   const data = await response.json();
 
-  const forms: Form[] = data.map((data: any) => transformToFormObject(data));
+  const forms: Form[] = data.map((data: Form) => transformToFormObject(data));
 
   return forms;
 };

@@ -33,10 +33,10 @@ export interface Form {
 export const creaFormInterface: FormInterface = {
   name: "CREA-MEDIA-2025-INNOVBUSMOD",
   initial_context_questions: [
-    "Aprasyk savo projekta",
-    "Antras klausimas",
-    "Trecias klausimas",
-    "Ketviratas klausimas",
+    "Write a brief summary of your company.",
+    "Write a brief summary of your project.",
+    "Write a brief summary of your partnners and participats.",
+    "Write a brief summary of your goals and objectives.",
   ],
   questions: [
     {

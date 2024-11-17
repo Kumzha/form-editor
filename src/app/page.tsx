@@ -34,11 +34,11 @@ export default function Home() {
       </div>
       {selectedForm && (
         <div className="container mx-auto flex flex-grow gap-20 mb-5 max-h-[726px]">
-          <div className="ml-5" style={{ flexBasis: "40%" }}>
-            <InputField />
-          </div>
-          <div className="mr-5" style={{ flexBasis: "60%" }}>
+          <div className="ml-5" style={{ flexBasis: "60%" }}>
             <PointField />
+          </div>
+          <div className="mr-5" style={{ flexBasis: "40%" }}>
+            <InputField />
           </div>
         </div>
       )}
