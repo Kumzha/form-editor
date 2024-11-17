@@ -71,7 +71,7 @@ const InputField = () => {
     };
 
     console.log(data);
-
+    setInputValue("");
     // Trigger the mutation
     mutation.mutate(data);
   };
@@ -87,6 +87,12 @@ const InputField = () => {
             className="textarea textarea-bordered h-12 min-w-80"
             placeholder="Bio"
             onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault(); // Prevent newline from being added
+                handleSubmit(e); // Call handleSubmit
+              }
+            }}
           ></textarea>
           <div className="label">
             <span className="label-text-alt">Alt label</span>
