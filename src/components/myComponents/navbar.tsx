@@ -5,14 +5,11 @@ import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/store/user/userSlice";
+import { FaUserCircle } from "react-icons/fa";
 
 // MOBILE COMPATIBLE
 
-interface NavbarProps {
-  userSignedIn: boolean;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
+const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -26,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
   };
 
   return (
-    <div className="navbar bg-base-200 h-14">
+    <div className="navbar h-10 bg-gray-100">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -47,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
           </div>
           <ul
             tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] w-52 px-2 shadow"
           >
             <li>
               <a>Item 1</a>
@@ -57,7 +54,9 @@ const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
             </li>
           </ul>
         </div>
-        <a className="btn btn-ghost text-xl">LOGO</a>
+        <p className="text-xl font-bold font-sans pl-5">
+          Form Matcher <span className="text-blue-500">PRO</span>
+        </p>
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-x-4">
@@ -67,21 +66,20 @@ const Navbar: React.FC<NavbarProps> = ({ userSignedIn }) => {
           <li>
             <a>Item 2</a>
           </li>
-          <li>
-            <a>........Long item name........</a>
-          </li>
         </ul>
       </div>
       <div className="navbar-end">
-        {userSignedIn ? (
-          <Button className="mr-5" onClick={() => handleSignOut(userSignedIn)}>
-            Log Out
-          </Button>
-        ) : (
-          <Button className="mr-5" onClick={() => handleSignOut(userSignedIn)}>
-            Log In
-          </Button>
-        )}
+        <Button
+          variant={"primary"}
+          className="mr-5"
+          onClick={() => console.log("sign out")}
+        >
+          Export
+        </Button>
+        <Button className="mr-5" onClick={() => console.log("sign out")}>
+          Collaborate
+        </Button>
+        <FaUserCircle className="text-4xl mr-2" />
       </div>
     </div>
   );

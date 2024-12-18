@@ -14,14 +14,14 @@ interface DropDownProps {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformToFormObject(backendObj: any): Form {
   const form: Form = {
-    form_id: backendObj._id, // Map _id to form_id
-    form_type: creaFormInterface, // Map form_template_name to form_type
+    form_id: backendObj._id,
+    form_type: creaFormInterface,
     name: backendObj.name,
     initial_context: backendObj.initial_context,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     points: backendObj.data.map((pointData: any[]) => ({
       subpoints: pointData.map((item: string) => ({
-        content: item, // Every element in the pointData is a subpoint
+        content: item,
       })),
     })),
   };
@@ -40,7 +40,7 @@ const fetchForms = async (): Promise<Form[]> => {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}`, // Add Authorization header
+      Authorization: `Bearer ${authToken}`,
     },
   });
 
@@ -74,26 +74,26 @@ const DropDown: React.FC<DropDownProps> = ({ forms }) => {
   }, [data, dispatch]);
 
   const handleSetSelectedForm = (form: Form) => {
-    alert("Selected form: " + form.name);
     console.log(form);
     dispatch(setSelectedForm(form));
   };
 
-  // if (isLoading) {
-  //   return <div>Loading...</div>;
-  // }
-
   return (
-    <details className="dropdown">
-      <summary className="btn w-40 m-1 font-sans">Form List</summary>
-      <ul className="menu dropdown-content bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+    <div className="dropdown">
+      <div tabIndex={0} role="button" className="btn m-1  font-sans">
+        Your Forms List
+      </div>
+      <ul
+        tabIndex={0}
+        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+      >
         {forms.map((form: Form, index: number) => (
           <li key={index} onClick={() => handleSetSelectedForm(form)}>
             <a>{form.name}</a>
           </li>
         ))}
       </ul>
-    </details>
+    </div>
   );
 };
 export default DropDown;

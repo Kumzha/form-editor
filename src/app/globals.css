@@ -6,6 +6,18 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.shadow-box {
+  width: 200px;
+  height: 100px;
+  margin: 20px;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
+    /* Bottom shadow */ 0 -4px 6px rgba(0, 0, 0, 0.1),
+    /* Top shadow */ -4px 0 6px rgba(0, 0, 0, 0.1),
+    /* Left shadow */ 4px 0 6px rgba(0, 0, 0, 0.1); /* Right shadow */
+  border-radius: 8px; /* Optional for rounded corners */
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

@@ -11,7 +11,7 @@ export interface UserForms {
 // TODO mock data
 const initialState: UserForms = {
   userForms: [creaForm],
-  selectedForm: null,
+  selectedForm: creaForm,
   selectedPoint: 0,
   selectedSubpoint: 0,
 };
