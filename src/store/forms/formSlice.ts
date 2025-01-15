@@ -10,7 +10,7 @@ export interface UserForms {
 
 // TODO mock data
 const initialState: UserForms = {
-  userForms: [creaForm],
+  userForms: [],
   selectedForm: creaForm,
   selectedPoint: 0,
   selectedSubpoint: 0,
@@ -57,6 +57,7 @@ const userFormsSlice = createSlice({
         ];
 
       if (subpoint) {
+        console.log("yes");
         subpoint.content = action.payload;
       }
     },

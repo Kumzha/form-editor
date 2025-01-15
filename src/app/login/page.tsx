@@ -13,16 +13,23 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
-
-interface LoginResponse {
-  token_type: string;
-  access_token: string;
-}
+import { signIn } from "@/store/user/userSlice";
+import { useDispatch } from "react-redux";
 
 interface LoginCredentials {
   email: string;
   hashed_password: string;
 }
+
+type Token = {
+  access_token: string;
+  token_type: string;
+};
+
+type LoginResponse = {
+  token: Token;
+  user_id: string;
+};
 
 const loginUser = async (
   credentials: LoginCredentials
@@ -44,6 +51,7 @@ const loginUser = async (
 };
 
 const LoginPage = () => {
+  const dispatch = useDispatch();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -53,7 +61,10 @@ const LoginPage = () => {
     mutationFn: loginUser,
     onSuccess: (data) => {
       console.log(data);
-      localStorage.setItem("authToken", data.access_token);
+      localStorage.setItem("authToken", data.token.access_token);
+      dispatch(
+        signIn({ token: data.token.access_token, user_id: data.user_id })
+      );
       router.push("/");
     },
     onError: (error: Error) => {

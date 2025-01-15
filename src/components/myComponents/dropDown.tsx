@@ -7,10 +7,6 @@ import { setSelectedForm, setUserForms } from "@/store/forms/formSlice";
 import { BASE_URL } from "@/constants/constants";
 import { useQuery } from "@tanstack/react-query";
 
-interface DropDownProps {
-  forms: Form[];
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function transformToFormObject(backendObj: any): Form {
   const form: Form = {
@@ -55,7 +51,7 @@ const fetchForms = async (): Promise<Form[]> => {
   return forms;
 };
 
-const DropDown: React.FC<DropDownProps> = ({ forms }) => {
+const DropDown: React.FC = () => {
   const { data } = useQuery<Form[], Error>({
     queryKey: ["fetchForms"],
     queryFn: fetchForms,
@@ -87,7 +83,7 @@ const DropDown: React.FC<DropDownProps> = ({ forms }) => {
         tabIndex={0}
         className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
       >
-        {forms.map((form: Form, index: number) => (
+        {data?.map((form: Form, index: number) => (
           <li key={index} onClick={() => handleSetSelectedForm(form)}>
             <a>{form.name}</a>
           </li>
