@@ -116,6 +116,7 @@ const SubpointsField = () => {
                 </Label>
                 <Separator />
                 <Textarea
+                  variant="default"
                   value={
                     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]
                       ?.content || ""

@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import FormEditor from "@/components/myComponents/FormEditor";
 import { useEffect } from "react";
 import DropDown from "@/components/myComponents/dropDown";
+import NewForm from "@/components/myComponents/newForm";
 
 export default function Home() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function Home() {
       <Navbar />
       <div className="max-h-screen h-screen flex flex-row bg-gray-100">
         <DropDown />
+        <NewForm />
         <div className="w-1/6 h-full"></div>
         <div className="w-4/6 h-full bg-gray-100 flex flex-col gap-5">
           <FormEditor form={selectedForm} />

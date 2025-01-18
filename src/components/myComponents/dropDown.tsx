@@ -1,55 +1,23 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Form, creaFormInterface } from "@/types/formType";
+import { Form } from "@/types/formType";
 import { useDispatch } from "react-redux";
 import { setSelectedForm, setUserForms } from "@/store/forms/formSlice";
-import { BASE_URL } from "@/constants/constants";
+import { Button } from "../ui/button";
+import { fetchForms } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function transformToFormObject(backendObj: any): Form {
-  const form: Form = {
-    form_id: backendObj._id,
-    form_type: creaFormInterface,
-    name: backendObj.name,
-    initial_context: backendObj.initial_context,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    points: backendObj.data.map((pointData: any[]) => ({
-      subpoints: pointData.map((item: string) => ({
-        content: item,
-      })),
-    })),
-  };
-
-  return form;
-}
-
-const fetchForms = async (): Promise<Form[]> => {
-  const authToken = localStorage.getItem("authToken");
-
-  if (!authToken) {
-    throw new Error("No authorization token found");
-  }
-
-  const response = await fetch(BASE_URL + "/form/get/me/all", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch forms");
-  }
-
-  const data = await response.json();
-
-  const forms: Form[] = data.map((data: Form) => transformToFormObject(data));
-
-  return forms;
-};
 
 const DropDown: React.FC = () => {
   const { data } = useQuery<Form[], Error>({
@@ -75,21 +43,25 @@ const DropDown: React.FC = () => {
   };
 
   return (
-    <div className="dropdown">
-      <div tabIndex={0} role="button" className="btn m-1  font-sans">
-        Your Forms List
-      </div>
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
-      >
-        {data?.map((form: Form, index: number) => (
-          <li key={index} onClick={() => handleSetSelectedForm(form)}>
-            <a>{form.name}</a>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant={"primary"}>Open my forms</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>My Forms</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          {data?.map((form: Form, index: number) => (
+            <DropdownMenuItem
+              key={index}
+              onClick={() => handleSetSelectedForm(form)}
+            >
+              {form.name}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 export default DropDown;

@@ -57,7 +57,6 @@ const userFormsSlice = createSlice({
         ];
 
       if (subpoint) {
-        console.log("yes");
         subpoint.content = action.payload;
       }
     },
