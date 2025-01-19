@@ -1,5 +1,3 @@
-//MODIFY -> update field
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
@@ -42,7 +40,7 @@ const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
     throw new Error("Failed to update form");
   }
 
-  return response.json(); // Assuming the response has a message field and possibly others
+  return response.json();
 };
 
 const ModifyButton: React.FC<ModifyProps> = ({
@@ -55,12 +53,11 @@ const ModifyButton: React.FC<ModifyProps> = ({
   const mutation = useMutation<ApiResponse, Error, UpdateFieldRequest>({
     mutationFn: updateField,
     onSuccess: (data) => {
-      console.log("Success:", data.result); // Handle success response
+      console.log("Success:", data.result);
       dispatch(updateSelectedSubpoint(data.result));
     },
-
     onError: (error) => {
-      console.error("Error updating form:", error.message); // Handle error
+      console.error("Error updating form:", error.message);
     },
   });
 
@@ -85,29 +82,33 @@ const ModifyButton: React.FC<ModifyProps> = ({
     setIsOpen(false);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevents the default behavior of adding a new line
+      handleSubmit(); // Calls the submit function
+    }
+  };
+
   return (
     <div className="relative inline-block text-left">
-      {/* Button */}
       <Button variant={"primary"} onClick={() => setIsOpen((prev) => !prev)}>
         Modify
       </Button>
 
-      {/* Dropdown */}
       {isOpen && (
         <div
           className="absolute mt-2 w-56 bg-white border rounded shadow-lg p-4 z-10"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Text Input */}
           <textarea
             value={inputValue}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown} // Add this event handler
             className="w-full p-2 border rounded"
             placeholder="Write something..."
             rows={3}
           />
 
-          {/* Submit Button */}
           <Button variant={"primary"} onClick={handleSubmit}>
             Update
           </Button>

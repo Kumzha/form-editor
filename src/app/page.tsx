@@ -28,8 +28,6 @@ export default function Home() {
     <div>
       <Navbar />
       <div className="max-h-screen h-screen flex flex-row bg-gray-100">
-        <DropDown />
-        <NewForm />
         <div className="w-1/6 h-full"></div>
         <div className="w-4/6 h-full bg-gray-100 flex flex-col gap-5">
           <FormEditor form={selectedForm} />

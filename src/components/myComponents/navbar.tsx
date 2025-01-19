@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/store/user/userSlice";
 import { FaUserCircle } from "react-icons/fa";
+import DropDown from "./dropDown";
+import NewForm from "./newForm";
 
 // MOBILE COMPATIBLE
 
@@ -61,12 +63,9 @@ const Navbar: React.FC = () => {
       </div>
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-x-4">
-          <li>
-            <a>Item 1</a>
-          </li>
-          <li>
-            <a>Item 2</a>
-          </li>
+          <DropDown />
+
+          <NewForm />
         </ul>
       </div>
       <div className="navbar-end">
