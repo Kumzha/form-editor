@@ -9,6 +9,7 @@ import { signOut } from "@/store/user/userSlice";
 import { FaUserCircle } from "react-icons/fa";
 import DropDown from "./dropDown";
 import NewForm from "./newForm";
+import RefreshForms from "./refreshFormButton";
 
 // MOBILE COMPATIBLE
 
@@ -64,7 +65,7 @@ const Navbar: React.FC = () => {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-x-4">
           <DropDown />
-
+          <RefreshForms />
           <NewForm />
         </ul>
       </div>
