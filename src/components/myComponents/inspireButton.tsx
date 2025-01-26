@@ -34,8 +34,8 @@ const inspire = async (
   if (!response.ok) {
     throw new Error("Failed to update form");
   }
-
-  return response.json();
+  const respData = await response.json();
+  return respData;
 };
 
 const InspireButton: React.FC = ({}) => {
@@ -70,7 +70,7 @@ const InspireButton: React.FC = ({}) => {
         selectedSubpoint
       ]?.prompt || "";
 
-    const formName = selectedForm?.form_type.name || "";
+    const formName = selectedForm?.name || "";
     const userQuery =
       selectedForm?.form_type.questions[selectedPoint].subpoints[
         selectedSubpoint
@@ -81,6 +81,7 @@ const InspireButton: React.FC = ({}) => {
       prompt_text: prompt,
       form_name: formName,
     };
+    console.log(data);
 
     inspireMutation.mutate(data);
   };
