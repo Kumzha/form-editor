@@ -81,7 +81,7 @@ const InspireButton: React.FC = ({}) => {
       prompt_text: prompt,
       form_name: formName,
     };
-    console.log(data);
+    console.log(selectedForm);
 
     inspireMutation.mutate(data);
   };

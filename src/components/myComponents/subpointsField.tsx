@@ -11,6 +11,7 @@ import {
 import ModifyButton from "./modifyButton";
 import SaveButton from "./saveButton";
 import InspireButton from "./inspireButton";
+import { Button } from "../ui/button";
 
 const SubpointsField = () => {
   const dispatch = useDispatch();
@@ -91,6 +92,7 @@ const SubpointsField = () => {
             {selectedSubpoint === index && (
               <div className="absolute top-1/2 right-[-90px] transform -translate-y-1/2 flex flex-col space-y-2">
                 {selectedSubpointContent ? <></> : <InspireButton />}
+                <Button onClick={() => console.log(selectedForm)}>aaaa</Button>
                 <SaveButton />
                 <ModifyButton
                   subpointText={selectedSubpointContent}

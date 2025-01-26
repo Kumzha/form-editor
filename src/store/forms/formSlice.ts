@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Form, creaForm } from "@/types/formType";
+import { Form } from "@/types/formType";
 
 export interface UserForms {
   userForms: Form[];
@@ -11,7 +11,7 @@ export interface UserForms {
 // TODO mock data
 const initialState: UserForms = {
   userForms: [],
-  selectedForm: creaForm,
+  selectedForm: null,
   selectedPoint: 0,
   selectedSubpoint: 0,
 };
