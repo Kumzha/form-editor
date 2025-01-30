@@ -8,8 +8,7 @@ import { setUserForms } from "@/store/forms/formSlice";
 import { useRouter } from "next/navigation";
 import FormEditor from "@/components/myComponents/FormEditor";
 import { useEffect } from "react";
-import DropDown from "@/components/myComponents/dropDown";
-import NewForm from "@/components/myComponents/newForm";
+import Sidebar from "@/components/myComponents/appSidebar";
 
 export default function Home() {
   const router = useRouter();
@@ -25,14 +24,16 @@ export default function Home() {
     }
   }, [router]);
   return (
-    <div>
-      <Navbar />
-      <div className="max-h-screen h-screen flex flex-row bg-gray-100">
-        <div className="w-1/6 h-full"></div>
-        <div className="w-4/6 h-full bg-gray-100 flex flex-col gap-5">
+    <div className="flex flex-col min-h-screen">
+      <Navbar form={selectedForm} />
+      <div className="flex flex-1 bg-gray-100">
+        <div className="w-1/6">
+          <Sidebar />
+        </div>
+        <div className="w-4/6 flex flex-col gap-5 flex-1">
           <FormEditor form={selectedForm} />
         </div>
-        <div className="w-1/6 h-full"></div>
+        <div className="w-1/6"></div>
       </div>
     </div>
   );

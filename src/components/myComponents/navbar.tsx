@@ -10,10 +10,15 @@ import { FaUserCircle } from "react-icons/fa";
 import DropDown from "./dropDown";
 import NewForm from "./newForm";
 import RefreshForms from "./refreshFormButton";
+import { Form } from "@/types/formType";
+
+interface NavbarProps {
+  form: Form | null;
+}
 
 // MOBILE COMPATIBLE
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<NavbarProps> = ({ form }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -27,7 +32,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="navbar h-10 bg-gray-100">
+    <div className="navbar h-10 bg-gray-200">
       <div className="navbar-start">
         <div className="dropdown">
           <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -46,6 +51,7 @@ const Navbar: React.FC = () => {
               />
             </svg>
           </div>
+          {/* MOBILE MENU */}
           <ul
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] w-52 px-2 shadow"
@@ -63,11 +69,19 @@ const Navbar: React.FC = () => {
         </p>
       </div>
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1 gap-x-4">
+        {/* <ul className="menu menu-horizontal px-1 gap-x-4">
           <DropDown />
           <RefreshForms />
           <NewForm />
-        </ul>
+        </ul> */}
+
+        {/* Name at navbar */}
+        {/* <div className="flex flex-col gap-2">
+          <div className="w-full h-5 text-base font-bold flex items-center justify-center">
+            {form?.name}
+          </div>
+          <div>{form?.form_type.name}</div>
+        </div> */}
       </div>
       <div className="navbar-end">
         <Button
