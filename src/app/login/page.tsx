@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useMutation } from "@tanstack/react-query";
 import { signIn } from "@/store/user/userSlice";
 import { useDispatch } from "react-redux";
+import Cookies from "js-cookie";
 
 interface LoginCredentials {
   email: string;
@@ -60,10 +61,14 @@ const LoginPage = () => {
   const { mutate } = useMutation<LoginResponse, Error, LoginCredentials>({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      console.log(data);
+      Cookies.set("authToken", data.token.access_token, { expires: 7 });
       localStorage.setItem("authToken", data.token.access_token);
       dispatch(
-        signIn({ token: data.token.access_token, user_id: data.user_id })
+        signIn({
+          token: data.token.access_token,
+          user_id: data.user_id,
+          email: email,
+        })
       );
       router.push("/");
     },
@@ -75,7 +80,7 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Reset error before submitting
-    mutate({ email, hashed_password: password }); // Pass credentials to mutation function
+    mutate({ email, hashed_password: password });
   };
 
   return (
