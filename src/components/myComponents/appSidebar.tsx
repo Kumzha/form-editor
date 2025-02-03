@@ -5,7 +5,7 @@ import NewForm from "./newForm";
 import ShrinkingDiv from "./shrinkingDiv";
 
 const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isOpen, setIsOpen] = React.useState<boolean>(true);
 
   const handleToggle = () => {
     setIsOpen(!isOpen);

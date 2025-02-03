@@ -7,7 +7,6 @@ export function middleware(req: NextRequest) {
 
   if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
     if (!authToken) {
-      console.log("Redirecting to login due to unauthenticated access...");
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }

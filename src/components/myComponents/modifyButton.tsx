@@ -50,7 +50,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
 }) => {
   const dispatch = useDispatch();
 
-  const mutation = useMutation<ApiResponse, Error, UpdateFieldRequest>({
+  const modifyMutation = useMutation<ApiResponse, Error, UpdateFieldRequest>({
     mutationFn: updateField,
     onSuccess: (data) => {
       console.log("Success:", data.result);
@@ -68,7 +68,12 @@ const ModifyButton: React.FC<ModifyProps> = ({
     setInputValue(e.target.value);
   };
 
+  const isFetching = modifyMutation.status === "pending";
+
   const handleSubmit = async () => {
+    // Prevent submitting another request while one is in progress
+    if (isFetching) return;
+
     const data = {
       user_query: inputValue,
       prompt_text: query,
@@ -76,23 +81,28 @@ const ModifyButton: React.FC<ModifyProps> = ({
       subpoint_text: subpointText,
     };
 
-    mutation.mutate(data);
+    modifyMutation.mutate(data);
 
+    // Optionally clear the input and close the popover
     setInputValue("");
     setIsOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevents the default behavior of adding a new line
-      handleSubmit(); // Calls the submit function
+      e.preventDefault(); // Prevent new line insertion
+      handleSubmit();
     }
   };
 
   return (
     <div className="relative inline-block text-left">
-      <Button variant={"primary"} onClick={() => setIsOpen((prev) => !prev)}>
-        Modify
+      <Button
+        variant={"primary"}
+        onClick={() => setIsOpen((prev) => !prev)}
+        disabled={isFetching}
+      >
+        {isFetching ? " " : "Modify"}
       </Button>
 
       {isOpen && (
@@ -103,7 +113,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
           <textarea
             value={inputValue}
             onChange={handleInputChange}
-            onKeyDown={handleKeyDown} // Add this event handler
+            onKeyDown={handleKeyDown}
             className="w-full p-2 border rounded"
             placeholder="Write something..."
             rows={3}
