@@ -57,7 +57,7 @@ const Progress = React.forwardRef<
         />
       </ProgressPrimitive.Root>
       <div className="flex justify-between text-xs mt-1 bg-gray-100">
-        {(numberOfSubpointsWithContent / numberOfSubpoints) * 100}%
+        {((numberOfSubpointsWithContent / numberOfSubpoints) * 100).toFixed(0)}%
       </div>
     </div>
   );

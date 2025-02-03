@@ -73,6 +73,7 @@ const LoginPage = () => {
       router.push("/");
     },
     onError: (error: Error) => {
+      console.log("Login successful");
       setError(error.message || "An error occurred during login");
     },
   });

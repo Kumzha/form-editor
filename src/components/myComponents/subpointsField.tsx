@@ -53,7 +53,7 @@ const SubpointsField = () => {
   };
 
   return (
-    <div className="bg-white w-full flex flex-col gap-2 border">
+    <div className="bg-white w-full flex flex-col gap-2 rounded pb-3 border">
       {selectedForm?.form_type.questions[selectedPoint].subpoints.map(
         (subpoint, index) => (
           <div
@@ -61,7 +61,7 @@ const SubpointsField = () => {
             className="relative m-1 rounded-lg border border-gray-300"
           >
             <div
-              className="grid w-full gap-1.5 mt-2"
+              className="grid w-full gap-1.5 mt-2 relative p-1"
               onClick={() => dispatch(setSelectedSubpoint(index))}
             >
               <Label htmlFor="message" className="mx-auto">
@@ -79,7 +79,7 @@ const SubpointsField = () => {
                 }}
                 onSelect={handleTextSelection} // Add onSelect event
               />
-              <div className="abslute top-0 right-0 p-1 text-xs text-gray-500">
+              <div className="absolute -bottom-5 left-0 p-1 text-xs text-gray-500">
                 {
                   (
                     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]

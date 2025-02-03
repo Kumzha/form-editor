@@ -38,7 +38,7 @@ const inspire = async (
   return respData;
 };
 
-const InspireButton: React.FC = ({}) => {
+const InspireButton: React.FC = () => {
   const dispatch = useDispatch();
 
   const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
@@ -64,7 +64,11 @@ const InspireButton: React.FC = ({}) => {
     },
   });
 
+  const isFetching = inspireMutation.status === "pending"; // Check if mutation is in progress
+
   const handleInspire = () => {
+    if (isFetching) return; // Prevent multiple requests
+
     const prompt =
       selectedForm?.form_type.questions[selectedPoint]?.subpoints[
         selectedSubpoint
@@ -81,14 +85,14 @@ const InspireButton: React.FC = ({}) => {
       prompt_text: prompt,
       form_name: formName,
     };
-    console.log(selectedForm);
 
+    console.log(selectedForm);
     inspireMutation.mutate(data);
   };
 
   return (
-    <Button variant={"primary"} onClick={handleInspire}>
-      Inspire
+    <Button variant="primary" onClick={handleInspire} disabled={isFetching}>
+      {isFetching ? " " : "Inspire"}
     </Button>
   );
 };
