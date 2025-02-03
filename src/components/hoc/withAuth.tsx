@@ -16,6 +16,7 @@ const WithAuth = ({ children }: { children: React.ReactNode }) => {
 
     if (!token) {
       router.push("/login");
+      return;
     }
 
     if (!isSignedIn && token) {
@@ -23,9 +24,8 @@ const WithAuth = ({ children }: { children: React.ReactNode }) => {
       dispatch(fetchUser() as any)
         .then(unwrapResult)
         .catch(() => {
-          // Sign the user out
-          signOut();
-          console.log("Redirecting to login due to failed authentication");
+          // Sign the user out and remove any tokens stored
+          dispatch(signOut());
           router.push("/login");
         });
     }

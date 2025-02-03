@@ -21,9 +21,11 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
+      console.log("No token found inside main page useEffect");
       router.push("/login");
     }
   }, [router]);
+
   return (
     <WithAuth>
       <div className="flex flex-col min-h-screen">

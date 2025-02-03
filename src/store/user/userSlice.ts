@@ -65,6 +65,7 @@ const userSlice = createSlice({
       state.user_id = "";
       state.token = "";
 
+      localStorage.removeItem("authToken");
       Cookies.remove("authToken");
     },
   },
