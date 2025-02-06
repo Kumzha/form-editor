@@ -63,105 +63,6 @@ export default CanvaTextArea;
 
 // #################################################################
 
-// ChatGpt variant
-
-// #################################################################
-
-// import React, { useState } from "react";
-// import { Textarea } from "../ui/textarea";
-// import { useDispatch, useSelector } from "react-redux";
-// import { RootState } from "@/store/store";
-// import { updateSelectedSubpoint } from "@/store/forms/formSlice";
-
-// interface CanvaTextAreaProps {
-//   index: number;
-// }
-
-// const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
-//   const { selectedForm, selectedPoint } = useSelector(
-//     (state: RootState) => state.userForms
-//   );
-
-//   const dispatch = useDispatch();
-//   const [text, setText] = useState(
-//     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
-//   );
-//   const [highlightedText, setHighlightedText] = useState<string[]>([]);
-
-//   const handleTextSelection = (
-//     event: React.SyntheticEvent<HTMLTextAreaElement>
-//   ) => {
-//     const textarea = event.target as HTMLTextAreaElement;
-//     const start = textarea.selectionStart;
-//     const end = textarea.selectionEnd;
-//     const selected = textarea.value.substring(start, end);
-
-//     if (selected.trim()) {
-//       setHighlightedText((prev) => [...prev, selected]); // Store highlighted sections
-//     }
-//   };
-
-//   const applyHighlighting = (content: string) => {
-//     if (!highlightedText.length) return content;
-
-//     let highlightedContent = content;
-//     highlightedText.forEach((text) => {
-//       const regex = new RegExp(`(${text})`, "gi");
-//       highlightedContent = highlightedContent.replace(
-//         regex,
-//         `<mark style="background-color: yellow;">$1</mark>`
-//       );
-//     });
-
-//     return highlightedContent;
-//   };
-
-//   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-//     setText(e.target.value);
-//     dispatch(updateSelectedSubpoint(e.target.value));
-//   };
-
-//   return (
-//     <div style={{ position: "relative", width: "100%" }}>
-//       {/* Hidden content for highlight effect */}
-//       <div
-//         dangerouslySetInnerHTML={{ __html: applyHighlighting(text) }}
-//         style={{
-//           position: "absolute",
-//           top: 0,
-//           left: 0,
-//           right: 0,
-//           bottom: 0,
-//           padding: "8px",
-//           whiteSpace: "pre-wrap",
-//           overflowWrap: "break-word",
-//           pointerEvents: "none",
-//           color: "transparent",
-//           backgroundColor: "white",
-//         }}
-//       ></div>
-
-//       {/* Actual textarea */}
-//       <Textarea
-//         variant="default"
-//         value={text}
-//         onChange={handleChange}
-//         onSelect={handleTextSelection}
-//         style={{
-//           backgroundColor: "transparent",
-//           position: "relative",
-//           zIndex: 1,
-//           color: "black",
-//         }}
-//       />
-//     </div>
-//   );
-// };
-
-// export default CanvaTextArea;
-
-// #################################################################
-
 // Variant that stores it on the bottom of the textarea
 
 // #################################################################
@@ -376,59 +277,69 @@ export default CanvaTextArea;
 
 // #################################################################
 
-// Another version of component
+// Best one yet
 
 // #################################################################
 
-// import type React from "react"
-// import { useState, useRef } from "react"
-// import { useDispatch, useSelector } from "react-redux"
-// import type { RootState } from "@/store/store"
-// import { updateSelectedSubpoint } from "@/store/forms/formSlice"
+// import type React from "react";
+// import { useState, useRef } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import type { RootState } from "@/store/store";
+// import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 
 // interface CanvaTextAreaProps {
-//   index: number
+//   index: number;
 // }
 
 // const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
-//   const { selectedForm, selectedPoint } = useSelector((state: RootState) => state.userForms)
+//   const { selectedForm, selectedPoint } = useSelector(
+//     (state: RootState) => state.userForms
+//   );
 
-//   const dispatch = useDispatch()
+//   const dispatch = useDispatch();
 
-//   const [highlightRange, setHighlightRange] = useState<{ start: number; end: number } | null>(null)
-//   const textareaRef = useRef<HTMLTextAreaElement>(null)
+//   const [highlightRange, setHighlightRange] = useState<{
+//     start: number;
+//     end: number;
+//   } | null>(null);
+//   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-//   const content = selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
+//   const content =
+//     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
-//   const handleTextSelection = (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
-//     const textarea = event.target as HTMLTextAreaElement
+//   const handleTextSelection = (
+//     event: React.SyntheticEvent<HTMLTextAreaElement>
+//   ) => {
+//     const textarea = event.target as HTMLTextAreaElement;
 //     if (textarea.selectionStart !== textarea.selectionEnd) {
 //       setHighlightRange({
 //         start: textarea.selectionStart,
 //         end: textarea.selectionEnd,
-//       })
+//       });
 //     }
-//   }
+//   };
 
 //   const handleUpdateSubpoint = (value: string) => {
-//     dispatch(updateSelectedSubpoint(value))
-//   }
+//     dispatch(updateSelectedSubpoint(value));
+//   };
 
 //   const renderContent = () => {
-//     if (!highlightRange) return content
+//     if (!highlightRange) return content;
 
-//     const before = content.slice(0, highlightRange.start)
-//     const highlighted = content.slice(highlightRange.start, highlightRange.end)
-//     const after = content.slice(highlightRange.end)
+//     const before = content.slice(0, highlightRange.start);
+//     const highlighted = content.slice(highlightRange.start, highlightRange.end);
+//     const after = content.slice(highlightRange.end);
 
 //     return (
 //       <>
 //         {before}
-//         <span style={{ backgroundColor: "blue", color: "white" }}>{highlighted}</span>
+//         <span style={{ backgroundColor: "#3367D1", color: "white" }}>
+//           {highlighted}
+//         </span>
 //         {after}
 //       </>
-//     )
-//   }
+//     );
+//   };
 
 //   return (
 //     <div className="relative" style={{ minHeight: "100px" }}>
@@ -454,19 +365,22 @@ export default CanvaTextArea;
 //         }}
 //         value={content}
 //         onChange={(e) => {
-//           handleUpdateSubpoint(e.target.value)
-//           setHighlightRange(null)
+//           handleUpdateSubpoint(e.target.value);
+//           setHighlightRange(null);
 //         }}
 //         onSelect={handleTextSelection}
 //       />
-//       <button onClick={() => console.log(highlightRange)} className="absolute bottom-0 left-0 text-xs mt-2">
+//       <button
+//         onClick={() => console.log(highlightRange)}
+//         className="absolute bottom-0 left-0 text-xs mt-2"
+//       >
 //         Log Highlight Range
 //       </button>
 //     </div>
-//   )
-// }
+//   );
+// };
 
-// export default CanvaTextArea
+// export default CanvaTextArea;
 
 // #################################################################
 
@@ -475,7 +389,7 @@ export default CanvaTextArea;
 // #################################################################
 
 // import type React from "react";
-// import { useState, useRef, useEffect } from "react";
+// import { useState, useRef, useCallback } from "react";
 // import { useDispatch, useSelector } from "react-redux";
 // import type { RootState } from "@/store/store";
 // import { updateSelectedSubpoint } from "@/store/forms/formSlice";
@@ -491,77 +405,213 @@ export default CanvaTextArea;
 
 //   const dispatch = useDispatch();
 
-//   const [selectedText, setSelectedText] = useState<string>("");
-//   const [cursorPosition, setCursorPosition] = useState<number>(0);
+//   const [highlightRange, setHighlightRange] = useState<{
+//     start: number;
+//     end: number;
+//   } | null>(null);
 //   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
 //   const content =
 //     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
-//   const handleTextSelection = (
-//     event: React.SyntheticEvent<HTMLTextAreaElement>
-//   ) => {
-//     const textarea = event.target as HTMLTextAreaElement;
-//     const selected = textarea.value.substring(
-//       textarea.selectionStart,
-//       textarea.selectionEnd
-//     );
-//     setSelectedText(selected);
-//     setCursorPosition(textarea.selectionStart);
-//   };
+//   const handleTextSelection = useCallback(
+//     (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
+//       const textarea = event.target as HTMLTextAreaElement;
+//       if (textarea.selectionStart !== textarea.selectionEnd) {
+//         setHighlightRange({
+//           start: textarea.selectionStart,
+//           end: textarea.selectionEnd,
+//         });
+//       } else {
+//         setHighlightRange(null);
+//       }
+//     },
+//     []
+//   );
+
+//   const handleClick = useCallback(
+//     (event: React.MouseEvent<HTMLTextAreaElement>) => {
+//       const textarea = event.target as HTMLTextAreaElement;
+//       if (textarea.selectionStart === textarea.selectionEnd) {
+//         setHighlightRange(null);
+//       }
+//     },
+//     []
+//   );
 
 //   const handleUpdateSubpoint = (value: string) => {
 //     dispatch(updateSelectedSubpoint(value));
 //   };
 
-//   useEffect(() => {
-//     if (textareaRef.current) {
-//       textareaRef.current.setSelectionRange(cursorPosition, cursorPosition);
-//     }
-//   }, [cursorPosition]);
-
 //   const renderContent = () => {
-//     const parts = content.split(/\b(proposal)\b/i);
-//     return parts.map((part, index) =>
-//       part.toLowerCase() === "proposal" ? (
-//         <span key={index} style={{ backgroundColor: "blue", color: "white" }}>
-//           {part}
+//     if (!highlightRange) return content;
+
+//     const before = content.slice(0, highlightRange.start);
+//     const highlighted = content.slice(highlightRange.start, highlightRange.end);
+//     const after = content.slice(highlightRange.end);
+
+//     return (
+//       <>
+//         {before}
+//         <span style={{ backgroundColor: "#3367D1", color: "white" }}>
+//           {highlighted}
 //         </span>
-//       ) : (
-//         <span key={index}>{part}</span>
-//       )
+//         {after}
+//       </>
 //     );
 //   };
 
 //   return (
-//     <>
+//     <div className="relative" style={{ minHeight: "100px" }}>
 //       <div
-//         className="relative"
+//         className="absolute inset-0 p-2 whitespace-pre-wrap break-words pointer-events-none"
 //         style={{
-//           minHeight: "100px",
-//           border: "1px solid #ccc",
-//           borderRadius: "4px",
-//           padding: "8px",
-//           whiteSpace: "pre-wrap",
-//           overflowWrap: "break-word",
+//           fontFamily: "inherit",
+//           fontSize: "inherit",
+//           lineHeight: "inherit",
 //         }}
 //       >
 //         {renderContent()}
-//         <textarea
-//           ref={textareaRef}
-//           className="absolute inset-0 w-full h-full opacity-0 resize-none"
-//           value={content}
-//           onChange={(e) => {
-//             handleUpdateSubpoint(e.target.value);
-//             setCursorPosition(e.target.selectionStart);
-//           }}
-//           onSelect={handleTextSelection}
-//         />
 //       </div>
-//       <button onClick={() => console.log(selectedText)} className="text-xs">
-//         aaaaaaa
+//       <textarea
+//         ref={textareaRef}
+//         className="absolute inset-0 w-full h-full resize-none bg-transparent p-2"
+//         style={{
+//           caretColor: "black",
+//           color: "transparent",
+//           fontFamily: "inherit",
+//           fontSize: "inherit",
+//           lineHeight: "inherit",
+//         }}
+//         value={content}
+//         onChange={(e) => {
+//           handleUpdateSubpoint(e.target.value);
+//           setHighlightRange(null);
+//         }}
+//         onSelect={handleTextSelection}
+//         onClick={handleClick}
+//       />
+//       <button
+//         onClick={() => console.log(highlightRange)}
+//         className="absolute bottom-0 left-0 text-xs mt-2"
+//       >
+//         Log Highlight Range
 //       </button>
-//     </>
+//     </div>
+//   );
+// };
+
+// export default CanvaTextArea;
+
+// #################################################################
+
+// BEST ONE
+
+// #################################################################
+
+// import type React from "react";
+// import { useState, useRef, useCallback } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import type { RootState } from "@/store/store";
+// import { updateSelectedSubpoint } from "@/store/forms/formSlice";
+
+// interface CanvaTextAreaProps {
+//   index: number;
+// }
+
+// const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
+//   const { selectedForm, selectedPoint } = useSelector(
+//     (state: RootState) => state.userForms
+//   );
+
+//   const dispatch = useDispatch();
+
+//   const [highlightRange, setHighlightRange] = useState<{
+//     start: number;
+//     end: number;
+//   } | null>(null);
+//   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+//   const content =
+//     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
+
+//   const handleTextSelection = useCallback(
+//     (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
+//       const textarea = event.target as HTMLTextAreaElement;
+//       if (textarea.selectionStart !== textarea.selectionEnd) {
+//         setHighlightRange({
+//           start: textarea.selectionStart,
+//           end: textarea.selectionEnd,
+//         });
+//       } else {
+//         setHighlightRange(null);
+//       }
+//     },
+//     []
+//   );
+
+//   const handleClick = useCallback(() => {
+//     setHighlightRange(null);
+//   }, []);
+
+//   const handleMouseDown = useCallback(() => {
+//     setHighlightRange(null);
+//   }, []);
+
+//   const handleUpdateSubpoint = (value: string) => {
+//     dispatch(updateSelectedSubpoint(value));
+//   };
+
+//   const renderContent = () => {
+//     if (!highlightRange) return content;
+
+//     const before = content.slice(0, highlightRange.start);
+//     const highlighted = content.slice(highlightRange.start, highlightRange.end);
+//     const after = content.slice(highlightRange.end);
+
+//     return (
+//       <>
+//         {before}
+//         <span style={{ backgroundColor: "#3367D1", color: "white" }}>
+//           {highlighted}
+//         </span>
+//         {after}
+//       </>
+//     );
+//   };
+
+//   return (
+//     <div className="relative" style={{ height: "100px" }}>
+//       <div
+//         className="absolute inset-0 p-2 whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
+//         style={{
+//           fontFamily: "inherit",
+//           fontSize: "inherit",
+//           lineHeight: "inherit",
+//         }}
+//       >
+//         {renderContent()}
+//       </div>
+//       <textarea
+//         ref={textareaRef}
+//         className="absolute inset-0 w-full h-full resize-none bg-transparent p-2 overflow-auto"
+//         style={{
+//           caretColor: "black",
+//           color: "transparent",
+//           fontFamily: "inherit",
+//           fontSize: "inherit",
+//           lineHeight: "inherit",
+//         }}
+//         value={content}
+//         onChange={(e) => {
+//           handleUpdateSubpoint(e.target.value);
+//           setHighlightRange(null);
+//         }}
+//         onSelect={handleTextSelection}
+//         // onClick={handleClick}
+//         onMouseDown={handleMouseDown}
+//       />
+//     </div>
 //   );
 // };
 
