@@ -30,12 +30,11 @@ const NewForm: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formName, setFormName] = useState<string>("");
   const [formType, setFormType] = useState<string>("");
-  // Initialize with an empty array; it will be reset when formType is selected.
+
   const [formDescription, setFormDescription] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
 
-  // Fetch the list of form templates.
   const { data: templates } = useQuery<FormInterface[]>({
     queryKey: ["templates"],
     queryFn: async () => {
@@ -54,22 +53,12 @@ const NewForm: React.FC = () => {
     },
   });
 
-  // Log the fetched templates (for debugging).
-  useEffect(() => {
-    if (templates) {
-      console.log("Fetched templates:", templates);
-    }
-  }, [templates]);
-
-  // When the selected formType changes, reset the formDescription array to match
-  // the number of questions of the selected template.
   useEffect(() => {
     if (formType && templates) {
       const matchingTemplate = templates.find(
         (template) => template.name === formType
       );
       if (matchingTemplate) {
-        // Reset the description answers to an empty string for each question.
         setFormDescription(
           new Array(matchingTemplate.initial_context_questions.length).fill("")
         );
@@ -77,7 +66,6 @@ const NewForm: React.FC = () => {
     }
   }, [formType, templates]);
 
-  // Handler to update the answer for a specific question.
   const handleFormDescriptionChange = (index: number, value: string) => {
     setFormDescription((prev) => {
       const updated = [...prev];
@@ -86,7 +74,6 @@ const NewForm: React.FC = () => {
     });
   };
 
-  // Mutation to create a new form.
   const createNewForm = async (): Promise<Response> => {
     const authToken = localStorage.getItem("authToken");
 
@@ -129,9 +116,7 @@ const NewForm: React.FC = () => {
     },
   });
 
-  // Validate that every required field is filled before submitting.
   const handleSubmit = () => {
-    // Validate form name and form type.
     if (!formName.trim()) {
       toast.error("Form name is required");
       return;
@@ -141,7 +126,6 @@ const NewForm: React.FC = () => {
       return;
     }
 
-    // Validate that a matching template exists.
     const matchingTemplate = templates?.find(
       (template) => template.name === formType
     );
@@ -150,7 +134,6 @@ const NewForm: React.FC = () => {
       return;
     }
 
-    // Ensure every description input is non-empty.
     const allFieldsFilled = formDescription.every(
       (answer) => answer.trim() !== ""
     );
@@ -159,7 +142,6 @@ const NewForm: React.FC = () => {
       return;
     }
 
-    // If validation passes, submit the form.
     createForm();
   };
 

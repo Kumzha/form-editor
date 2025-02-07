@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/constants/constants";
+import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 import { useMutation } from "@tanstack/react-query";
+import { RootState } from "@/store/store";
 
 interface ModifyProps {
   subpointText: string;
@@ -20,9 +22,14 @@ type UpdateFieldRequest = {
 
 type ApiResponse = {
   result: string;
-  // Add other fields as needed
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isFormIdObject(value: any): value is { $oid: string } {
+  return value && typeof value === "object" && "$oid" in value;
+}
+
+// Note: Removed useSelector from this function.
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
   const token = localStorage.getItem("authToken");
 
@@ -50,11 +57,29 @@ const ModifyButton: React.FC<ModifyProps> = ({
 }) => {
   const dispatch = useDispatch();
 
+  // Use useSelector at the top of your component.
+  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+    (state: RootState) => state.userForms
+  );
+
+  const { save } = useSaveSubpoint();
+
   const modifyMutation = useMutation<ApiResponse, Error, UpdateFieldRequest>({
     mutationFn: updateField,
     onSuccess: (data) => {
-      console.log("Success:", data.result);
+      // Update your redux store
       dispatch(updateSelectedSubpoint(data.result));
+
+      // Now call your save function with the parameters
+      save(
+        data.result, // updated subpoint text from API response
+        selectedSubpoint,
+        selectedPoint,
+        isFormIdObject(selectedForm?.form_id)
+          ? selectedForm.form_id.$oid
+          : selectedForm?.form_id || "",
+        selectedForm?.name || ""
+      );
     },
     onError: (error) => {
       console.error("Error updating form:", error.message);
@@ -71,10 +96,9 @@ const ModifyButton: React.FC<ModifyProps> = ({
   const isFetching = modifyMutation.status === "pending";
 
   const handleSubmit = async () => {
-    // Prevent submitting another request while one is in progress
     if (isFetching) return;
 
-    const data = {
+    const data: UpdateFieldRequest = {
       user_query: inputValue,
       prompt_text: query,
       form_name: formName,
@@ -83,14 +107,13 @@ const ModifyButton: React.FC<ModifyProps> = ({
 
     modifyMutation.mutate(data);
 
-    // Optionally clear the input and close the popover
     setInputValue("");
     setIsOpen(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault(); // Prevent new line insertion
+      e.preventDefault();
       handleSubmit();
     }
   };

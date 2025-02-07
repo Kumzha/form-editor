@@ -45,7 +45,6 @@ const SubpointsField = () => {
                 {subpoint.sub_title}
               </Label>
               <Separator />
-              {/* Adding a key that depends on selectedPoint resets the component on change */}
               <CanvaTextArea
                 key={`textarea-${selectedPoint}-${index}`}
                 index={index}

@@ -5,6 +5,7 @@ import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/constants/constants";
 import { useMutation } from "@tanstack/react-query";
+import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 
 type InspireRequestSchema = {
   user_query: string;
@@ -15,6 +16,11 @@ type InspireRequestSchema = {
 type InspireApiResponse = {
   result: string;
 };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isFormIdObject(value: any): value is { $oid: string } {
+  return value && typeof value === "object" && "$oid" in value;
+}
 
 const inspire = async (
   data: InspireRequestSchema
@@ -45,6 +51,8 @@ const InspireButton: React.FC = () => {
     (state: RootState) => state.userForms
   );
 
+  const { save } = useSaveSubpoint();
+
   const handleUpdateSubpoint = (value: string) => {
     dispatch(updateSelectedSubpoint(value));
   };
@@ -57,6 +65,15 @@ const InspireButton: React.FC = () => {
     mutationFn: inspire,
     onSuccess: (data) => {
       handleUpdateSubpoint(data.result);
+      save(
+        data.result, // updated subpoint text from API response
+        selectedSubpoint,
+        selectedPoint,
+        isFormIdObject(selectedForm?.form_id)
+          ? selectedForm.form_id.$oid
+          : selectedForm?.form_id || "",
+        selectedForm?.name || ""
+      );
     },
 
     onError: (error) => {
