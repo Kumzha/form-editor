@@ -7,55 +7,65 @@
 // #################################################################
 
 import React, { useState } from "react";
-
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 
 interface CanvaTextAreaProps {
   index: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isFormIdObject(value: any): value is { $oid: string } {
+  return value && typeof value === "object" && "$oid" in value;
+}
+
 const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
-  const { selectedForm, selectedPoint } = useSelector(
+  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
     (state: RootState) => state.userForms
   );
-
+  const { save } = useSaveSubpoint();
   const dispatch = useDispatch();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedText, setSelectedText] = useState<string>("");
-
-  const handleTextSelection = (
-    event: React.SyntheticEvent<HTMLTextAreaElement>
-  ) => {
-    const textarea = event.target as HTMLTextAreaElement;
-    const selected = textarea.value.substring(
-      textarea.selectionStart,
-      textarea.selectionEnd
-    );
-    setSelectedText(selected);
-  };
+  // Debounce state
+  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   const handleUpdateSubpoint = (value: string) => {
     dispatch(updateSelectedSubpoint(value));
+
+    // Clear any existing debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Start a new debounce timer
+    const timer = setTimeout(() => {
+      save(
+        value,
+        selectedSubpoint,
+        selectedPoint,
+        isFormIdObject(selectedForm?.form_id)
+          ? selectedForm.form_id.$oid
+          : selectedForm?.form_id || "",
+        selectedForm?.name || ""
+      );
+    }, 5000); // 500ms debounce delay
+
+    setDebounceTimer(timer);
   };
 
   return (
-    <>
-      <Textarea
-        variant="default"
-        value={
-          selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content ||
-          ""
-        }
-        onChange={(e) => {
-          handleUpdateSubpoint(e.target.value);
-        }}
-        onSelect={handleTextSelection} // Add onSelect event
-      />
-    </>
+    <Textarea
+      variant="default"
+      value={
+        selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
+      }
+      onChange={(e) => handleUpdateSubpoint(e.target.value)}
+    />
   );
 };
 

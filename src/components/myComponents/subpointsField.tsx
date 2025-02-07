@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { setSelectedSubpoint } from "@/store/forms/formSlice";
 import ModifyButton from "./modifyButton";
-import SaveButton from "./saveButton";
 import InspireButton from "./inspireButton";
 import CanvaTextArea from "./canvaTextArea";
 
@@ -59,7 +58,6 @@ const SubpointsField = () => {
             {selectedSubpoint === index && (
               <div className="absolute top-1/2 right-[-90px] transform -translate-y-1/2 flex flex-col space-y-2">
                 {selectedSubpointContent ? <></> : <InspireButton />}
-                <SaveButton />
                 <ModifyButton
                   subpointText={selectedSubpointContent}
                   query={prompt}
