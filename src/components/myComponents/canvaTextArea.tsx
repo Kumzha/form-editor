@@ -53,7 +53,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
           : selectedForm?.form_id || "",
         selectedForm?.name || ""
       );
-    }, 5000); // 500ms debounce delay
+    }, 5000);
 
     setDebounceTimer(timer);
   };
