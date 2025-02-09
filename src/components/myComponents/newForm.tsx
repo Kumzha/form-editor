@@ -25,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BASE_URL } from "@/constants/constants";
 import { toast } from "sonner";
 import { FormInterface } from "@/types/formType";
+import { FiPlus } from "react-icons/fi";
 
 const NewForm: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -148,7 +149,9 @@ const NewForm: React.FC = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="primary">Create New Form</Button>
+        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md duration-300 cursor-pointer">
+          <FiPlus size={20} /> <div className="w-full">Create</div>
+        </div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>

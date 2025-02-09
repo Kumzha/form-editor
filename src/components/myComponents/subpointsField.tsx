@@ -30,18 +30,15 @@ const SubpointsField = () => {
     ]?.prompt || "";
 
   return (
-    <div className="bg-white w-full flex flex-col gap-2 rounded pb-3 border">
+    <div className="bg-gray-100 w-full flex flex-col gap-4 rounded pb-3">
       {selectedForm?.form_type.questions[selectedPoint].subpoints.map(
         (subpoint, index) => (
-          <div
-            key={index}
-            className="relative m-1 rounded-lg border border-gray-300"
-          >
+          <div key={index} className="relative mx-1 pb-1 rounded-lg">
             <div
-              className="grid w-full gap-1.5 mt-2 relative p-1"
+              className="grid w-full gap-1.5 relative p-1 bg-white rounded-md"
               onClick={() => dispatch(setSelectedSubpoint(index))}
             >
-              <Label htmlFor="message" className="mx-auto">
+              <Label htmlFor="message" className="mx-auto my-1">
                 {subpoint.sub_title}
               </Label>
               <Separator />
@@ -49,7 +46,7 @@ const SubpointsField = () => {
                 key={`textarea-${selectedPoint}-${index}`}
                 index={index}
               />
-              <div className="absolute -bottom-5 left-0 p-1 text-xs text-gray-500">
+              <div className="absolute -bottom-5 right-0 p-1 text-xs text-gray-500">
                 {
                   (
                     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]

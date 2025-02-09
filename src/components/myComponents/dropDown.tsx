@@ -4,9 +4,8 @@ import React, { useEffect } from "react";
 import { Form } from "@/types/formType";
 import { useDispatch } from "react-redux";
 import { setSelectedForm, setUserForms } from "@/store/forms/formSlice";
-import { Button } from "../ui/button";
 import { fetchForms } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RiFileList3Line } from "react-icons/ri";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 
@@ -24,6 +24,8 @@ const DropDown: React.FC = () => {
     queryKey: ["fetchForms"],
     queryFn: fetchForms,
   });
+
+  const queryClient = useQueryClient();
 
   const dispatch = useDispatch();
 
@@ -38,14 +40,18 @@ const DropDown: React.FC = () => {
   }, [data, dispatch]);
 
   const handleSetSelectedForm = (form: Form) => {
-    console.log(form);
+    queryClient.invalidateQueries({ queryKey: ["fetchForms"] });
     dispatch(setSelectedForm(form));
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={"primary"}>Open my forms</Button>
+        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md  duration-300 cursor-pointer">
+          <RiFileList3Line size={20} /> <span className="w-full">My Forms</span>
+        </div>
+
+        {/* <Button variant={"primary"}>Open my forms</Button> */}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Forms</DropdownMenuLabel>

@@ -19,7 +19,7 @@ const FormEditor: React.FC<FormEditorProps> = ({ form }) => {
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 mt-3">
         <div className="w-full h-5 text-base font-bold flex items-center justify-center">
           {form.name}
         </div>

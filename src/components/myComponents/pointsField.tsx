@@ -20,7 +20,7 @@ const PointsField = () => {
   if (!formPoints) return <></>;
 
   return (
-    <div className="w-full flex flex-row gap-2 ">
+    <div className="w-full flex flex-row gap-2 ml-1">
       {formPoints.map((question, index) => (
         <div
           key={index}

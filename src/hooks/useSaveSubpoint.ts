@@ -1,5 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { BASE_URL } from "@/constants/constants";
+import { toast } from "sonner";
 
 type SaveRequestSchema = {
   form_name: string;
@@ -71,7 +72,7 @@ export const useSaveSubpoint = () => {
       form_point: selectedPoint,
       form_subpoint: selectedSubpoint,
     };
-
+    toast.success("Subpoint updated successfully!");
     mutation.mutate(data);
   };
 

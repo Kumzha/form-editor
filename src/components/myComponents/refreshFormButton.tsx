@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "../ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedForm } from "@/store/forms/formSlice";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
@@ -7,6 +6,7 @@ import { toast } from "sonner";
 import { Form } from "@/types/formType";
 import { RootState } from "@/store/store";
 import { fetchForms } from "@/lib/utils";
+import { IoRefreshCircleOutline } from "react-icons/io5";
 
 const RefreshForms: React.FC = () => {
   const { selectedForm } = useSelector((state: RootState) => state.userForms);
@@ -53,9 +53,12 @@ const RefreshForms: React.FC = () => {
   };
 
   return (
-    <Button variant={"primary"} onClick={handleRefresh}>
-      Refresh Forms
-    </Button>
+    <div className="flex items-center mx-auto justify-center gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md  duration-300 cursor-pointer">
+      <IoRefreshCircleOutline size={20} />{" "}
+      <span className="w-full" onClick={handleRefresh}>
+        Refresh Forms
+      </span>
+    </div>
   );
 };
 export default RefreshForms;

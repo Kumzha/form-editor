@@ -64,9 +64,10 @@ const InspireButton: React.FC = () => {
   >({
     mutationFn: inspire,
     onSuccess: (data) => {
+      // console.log("Success inspiring:", data.result);
       handleUpdateSubpoint(data.result);
       save(
-        data.result, // updated subpoint text from API response
+        data.result,
         selectedSubpoint,
         selectedPoint,
         isFormIdObject(selectedForm?.form_id)
@@ -103,7 +104,6 @@ const InspireButton: React.FC = () => {
       form_name: formName,
     };
 
-    console.log(selectedForm);
     inspireMutation.mutate(data);
   };
 
