@@ -11,7 +11,10 @@ import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
-import { updateSelectedSubpoint } from "@/store/forms/formSlice";
+import {
+  updateSelectedSubpoint,
+  setSelectedSubpoint,
+} from "@/store/forms/formSlice";
 
 interface CanvaTextAreaProps {
   index: number;
@@ -33,6 +36,23 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
     null
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [selectedText, setSelectedText] = useState<string>("");
+
+  const handleTextSelection = (
+    event: React.SyntheticEvent<HTMLTextAreaElement>
+  ) => {
+    const textarea = event.target as HTMLTextAreaElement;
+    const selected = textarea.value.substring(
+      textarea.selectionStart,
+      textarea.selectionEnd
+    );
+    dispatch(setSelectedSubpoint(index));
+    if (selected) {
+      setSelectedText(selected);
+    }
+  };
 
   const handleUpdateSubpoint = (value: string) => {
     dispatch(updateSelectedSubpoint(value));
@@ -64,6 +84,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
       value={
         selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
       }
+      onSelect={handleTextSelection}
       onChange={(e) => handleUpdateSubpoint(e.target.value)}
     />
   );
