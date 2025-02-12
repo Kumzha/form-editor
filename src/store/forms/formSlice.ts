@@ -38,7 +38,7 @@ const userFormsSlice = createSlice({
     clearForms(state) {
       state.userForms = [];
     },
-    setSelectedForm(state, action: PayloadAction<Form>) {
+    setSelectedForm(state, action: PayloadAction<Form | null>) {
       state.selectedForm = action.payload;
       state.selectedPoint = 0;
       state.selectedSubpoint = 0;

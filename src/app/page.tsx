@@ -10,6 +10,7 @@ import FormEditor from "@/components/myComponents/FormEditor";
 import { useEffect } from "react";
 import Sidebar from "@/components/myComponents/appSidebar";
 import WithAuth from "@/components/hoc/withAuth";
+import FormList from "@/components/myComponents/formList";
 
 export default function Home() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function Home() {
             <Sidebar />
           </div>
           <div className="w-4/6 flex flex-col gap-5 flex-1">
-            <FormEditor form={selectedForm} />
+            {selectedForm ? <FormEditor form={selectedForm} /> : <FormList />}
           </div>
           <div className="w-1/6"></div>
         </div>
