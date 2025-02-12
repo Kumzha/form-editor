@@ -53,7 +53,7 @@ const RefreshForms: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center mx-auto justify-center gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md  duration-300 cursor-pointer">
+    <div className="flex items-center mx-auto justify-center gap-4 w-[90%] bg-[#E9E8DF] hover:bg-[#c6c4b8] transition-all p-2 rounded-md  duration-300 cursor-pointer">
       <IoRefreshCircleOutline size={20} />{" "}
       <span className="w-full" onClick={handleRefresh}>
         Refresh Forms

@@ -42,7 +42,11 @@ const Progress = React.forwardRef<
   }, [form, value]);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-2 my-2">
+    <div className="w-full flex flex-col items-center justify-center gap-2 mb-2">
+      <span className="text-sm whitespace-nowrap">{form.form_type.name}</span>
+      <div className="flex justify-between text-xs mt-1 bg-[#E9E8DF]">
+        {((numberOfSubpointsWithContent / numberOfSubpoints) * 100).toFixed(0)}%
+      </div>
       <ProgressPrimitive.Root
         ref={ref}
         className={cn(
@@ -56,9 +60,6 @@ const Progress = React.forwardRef<
           style={{ transform: `translateX(-${100 - (progressValue || 0)}%)` }}
         />
       </ProgressPrimitive.Root>
-      <div className="flex justify-between text-xs mt-1 bg-gray-100">
-        {((numberOfSubpointsWithContent / numberOfSubpoints) * 100).toFixed(0)}%
-      </div>
     </div>
   );
 });

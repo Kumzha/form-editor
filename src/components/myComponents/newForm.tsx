@@ -149,7 +149,7 @@ const NewForm: React.FC = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md duration-300 cursor-pointer">
+        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-[#E9E8DF] hover:bg-[#c6c4b8] transition-all p-2 rounded-md duration-300 cursor-pointer">
           <FiPlus size={20} /> <div className="w-full">Create</div>
         </div>
       </DialogTrigger>

@@ -47,7 +47,7 @@ const DropDown: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-gray-100 hover:bg-gray-200 transition-all p-2 rounded-md  duration-300 cursor-pointer">
+        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-[#E9E8DF] hover:bg-[#c6c4b8] transition-all p-2 rounded-md  duration-300 cursor-pointer">
           <RiFileList3Line size={20} /> <span className="w-full">My Forms</span>
         </div>
 

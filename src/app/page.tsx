@@ -30,7 +30,7 @@ export default function Home() {
     <WithAuth>
       <div className="flex flex-col min-h-screen">
         <Navbar form={selectedForm} />
-        <div className="flex flex-1 bg-gray-100">
+        <div className="flex flex-1 bg-[#F1F0E8]">
           <div className="w-1/6">
             <Sidebar />
           </div>

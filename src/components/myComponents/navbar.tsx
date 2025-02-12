@@ -11,91 +11,32 @@ import DropDown from "./dropDown";
 import NewForm from "./newForm";
 import RefreshForms from "./refreshFormButton";
 import { Form } from "@/types/formType";
+import { Progress } from "../ui/progress";
 
 interface NavbarProps {
   form: Form | null;
 }
 
-// MOBILE COMPATIBLE
-
 const Navbar: React.FC<NavbarProps> = ({ form }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const handleSignOut = (userSignedIn: boolean) => {
-    if (userSignedIn) {
-      dispatch(signOut());
-      router.push("/login");
-    } else {
-      router.push("/login");
-    }
-  };
-
   return (
-    <div className="navbar h-10 bg-gray-200">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-          </div>
-          {/* MOBILE MENU */}
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] w-52 px-2 shadow"
-          >
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Item 2</a>
-            </li>
-          </ul>
+    <div className="navbar h-10 bg-[#E9E8DF] fixed top-0 left-0 right-0 z-50 border-b-8 border-[#F1F0E8]">
+      <div className="navbar-start w-[15%]">
+        <div className="h-16 p-3 text-center flex items-center justify-center">
+          <p className="text-xl font-bold font-sans pl-3">coGrant</p>
         </div>
-        <p className="text-xl font-bold font-sans pl-3">
-          Form Matcher <span className="text-blue-500">PRO</span>
-        </p>
       </div>
-      <div className="navbar-center hidden lg:flex">
-        {/* <ul className="menu menu-horizontal px-1 gap-x-4">
-          <DropDown />
-          <RefreshForms />
-          <NewForm />
-        </ul> */}
-
-        {/* Name at navbar */}
-        {/* <div className="flex flex-col gap-2">
-          <div className="w-full h-5 text-base font-bold flex items-center justify-center">
-            {form?.name}
+      <div className="navbar-center w-[70%] hidden lg:flex items-center">
+        {form ? (
+          <div className="flex flex-col gap-2 w-full items-center font-semibold">
+            <span className="whitespace-nowrap">{form.name}</span>
           </div>
-          <div>{form?.form_type.name}</div>
-        </div> */}
+        ) : null}
+        {/* {form ? <Progress form={form} className="w-[40%]" /> : null} */}
       </div>
-      <div className="navbar-end">
-        <Button
-          variant={"primary"}
-          className="mr-5"
-          onClick={() => console.log("sign out")}
-        >
-          Export
-        </Button>
-        <Button className="mr-5" onClick={() => console.log("sign out")}>
-          Collaborate
-        </Button>
-        <FaUserCircle className="text-4xl mr-2" />
-      </div>
+      <div className="navbar-end w-[15%]"></div>
     </div>
   );
 };

@@ -30,12 +30,12 @@ const SubpointsField = () => {
     ]?.prompt || "";
 
   return (
-    <div className="bg-gray-100 w-full flex flex-col gap-4 rounded pb-3">
+    <div className="bg-[#F1F0E8] w-full flex flex-col gap-4 rounded pb-3">
       {selectedForm?.form_type.questions[selectedPoint].subpoints.map(
         (subpoint, index) => (
           <div key={index} className="relative mx-1 pb-1 rounded-lg">
             <div
-              className="grid w-full gap-1.5 relative p-1 bg-white rounded-md"
+              className="grid w-full gap-1.5 relative p-1 bg-white rounded-2xl"
               onClick={() => dispatch(setSelectedSubpoint(index))}
             >
               <Label htmlFor="message" className="mx-auto my-1">

@@ -20,13 +20,13 @@ const FormEditor: React.FC<FormEditorProps> = ({ form }) => {
   return (
     <>
       <div className="flex flex-col gap-3 mt-3">
-        <div className="w-full h-5 text-base font-bold flex items-center justify-center">
+        {/* <div className="w-full h-5 text-base font-bold flex items-center justify-center">
           {form.name}
         </div>
         <div className="w-full h-3 text-sm flex items-center justify-center">
           {form.form_type.name}
-        </div>
-        <div className="">
+        </div> */}
+        <div className="mt-20">
           <Progress form={form} className="w-[60%]" />
         </div>
         <div className="flex flex-col">
