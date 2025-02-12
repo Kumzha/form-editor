@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <div
-        className={`fixed left-0 bg-[#E9E8DF] top-[65px] h-[calc(100vh-76 px)] w-[15%] flex flex-col z-50 shadow-sm transition-transform duration-300 border rounded-tr-lg rounded-br-lg ${
+        className={`fixed left-0 bg-[#E9E8DF] top-[65px] h-[calc(100vh-76px)] w-[15%] flex flex-col z-50 shadow-sm transition-transform duration-300 border rounded-tr-lg rounded-br-lg ${
           isOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
         }`}
       >
