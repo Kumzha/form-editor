@@ -11,7 +11,7 @@ const DropDown: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
 
   return (
     <SidebarItem
-      text="My Forms"
+      text="My Proposals"
       logo={<RiFileList3Line size={20} />}
       onClick={() => dispatch(setSelectedForm(null))}
       isOpen={isOpen}

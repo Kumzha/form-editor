@@ -80,6 +80,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
 
   return (
     <Textarea
+      className="no-scrollbar"
       variant="default"
       value={
         selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""

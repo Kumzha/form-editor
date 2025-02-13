@@ -215,7 +215,7 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
                       (question, index) => (
                         <div
                           key={index}
-                          className="grid grid-cols-6 items-center gap-4"
+                          className="grid grid-cols-6 items-center gap-4 mt-5"
                         >
                           <Label
                             htmlFor={`input-${index + 1}`}

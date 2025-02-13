@@ -10,6 +10,18 @@ body {
   font-family: var(--font-instrument-sans);
 }
 
+.no-scrollbar {
+  /* For Firefox */
+  scrollbar-width: none;
+  /* For Internet Explorer 10+ */
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  /* For Chrome, Safari, and Opera */
+  display: none;
+}
+
 .shadow-box {
   width: 200px;
   height: 100px;
