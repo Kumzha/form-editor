@@ -44,7 +44,7 @@ const Progress = React.forwardRef<
   return (
     <div className="w-full flex flex-col items-center justify-center gap-2 mb-2">
       <span className="text-sm whitespace-nowrap">{form.form_type.name}</span>
-      <div className="flex justify-between text-xs mt-1 bg-[#E9E8DF]">
+      <div className="flex justify-between text-xs mt-1 bg-[#F1F0E8]">
         {((numberOfSubpointsWithContent / numberOfSubpoints) * 100).toFixed(0)}%
       </div>
       <ProgressPrimitive.Root

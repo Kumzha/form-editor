@@ -38,7 +38,7 @@ const SubpointsField = () => {
               className="grid w-full gap-1.5 relative p-1 bg-white rounded-2xl"
               onClick={() => dispatch(setSelectedSubpoint(index))}
             >
-              <Label htmlFor="message" className="mx-auto my-1">
+              <Label htmlFor="message" className="mx-auto my-1 text-[15px]">
                 {subpoint.sub_title}
               </Label>
               <Separator />

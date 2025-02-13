@@ -7,6 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { FaPenNib } from "react-icons/fa";
+import Image from "next/image";
 
 interface DocumentCardProps {
   form_name: string;
@@ -19,13 +21,27 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
   form_type,
   onClick,
 }) => {
+  const LKT = "/formIcons/LKT.svg";
+
   return (
     <div
       className="w-52 h-72 border rounded-lg shadow-md flex flex-col justify-between p-2 bg-white hover:shadow-lg hover:border-[#C96442] transition cursor-pointer"
       onClick={onClick} // Attach onClick handler
     >
       {/* Placeholder for document preview */}
-      <div className="flex-grow bg-gray-100 rounded-md"></div>
+      <div className="flex items-center justify-center flex-grow bg-gray-100 rounded-md">
+        {form_type === "LKT" ? (
+          <Image
+            src={LKT}
+            alt="LKT Icon"
+            width={50}
+            height={50}
+            color="#996553"
+          />
+        ) : (
+          <FaPenNib size={40} color="#996553" />
+        )}
+      </div>
 
       {/* Document details */}
       <div className="mt-2">
@@ -34,7 +50,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
           {form_type}
         </div>
         <div className="flex justify-between">
-          <FaFileAlt className="text-blue-500 mt-3" />
+          <FaFileAlt className=" mt-3" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div

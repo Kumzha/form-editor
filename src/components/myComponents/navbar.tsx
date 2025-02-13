@@ -24,8 +24,11 @@ const Navbar: React.FC<NavbarProps> = ({ form }) => {
   return (
     <div className="navbar h-10 bg-[#E9E8DF] fixed top-0 left-0 right-0 z-50 border-b-8 border-[#F1F0E8]">
       <div className="navbar-start w-[15%]">
-        <div className="h-16 p-3 text-center flex items-center justify-center">
-          <p className="text-xl font-bold font-sans pl-3">cogrant</p>
+        <div className="h-16 p-3 flex items-center justify-center">
+          <div className="w-5 h-5 bg-black rounded-full"></div>
+          <p className="inline-flex items-center text-xl font-bold font-sans pl-3 m-0 leading-none">
+            cogrant
+          </p>
         </div>
       </div>
       <div className="navbar-center w-[70%] hidden lg:flex items-center">

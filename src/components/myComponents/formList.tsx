@@ -37,8 +37,7 @@ const FormList: React.FC = () => {
 
   return (
     <div className="mt-20 px-4">
-      <div>NEW FORM</div>
-      <h1 className="text-xl font-bold mb-4">Forms</h1>
+      <h1 className="text-xl font-bold mb-4">My Proposals</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
         {data.map((form, index) => (
           <DocumentCard
