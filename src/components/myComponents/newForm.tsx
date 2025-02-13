@@ -26,8 +26,9 @@ import { BASE_URL } from "@/constants/constants";
 import { toast } from "sonner";
 import { FormInterface } from "@/types/formType";
 import { FiPlus } from "react-icons/fi";
+import SidebarItem from "@/components/myComponents/sidebarItem";
 
-const NewForm: React.FC = () => {
+const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formName, setFormName] = useState<string>("");
   const [formType, setFormType] = useState<string>("");
@@ -149,9 +150,11 @@ const NewForm: React.FC = () => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <div className="flex items-center justify-center mx-auto gap-4 w-[90%] bg-[#E9E8DF] hover:bg-[#c6c4b8] transition-all p-2 rounded-md duration-300 cursor-pointer">
-          <FiPlus size={20} /> <div className="w-full">Create</div>
-        </div>
+        <SidebarItem
+          text="Create"
+          logo={<FiPlus size={20} />}
+          isOpen={isOpen}
+        />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>
