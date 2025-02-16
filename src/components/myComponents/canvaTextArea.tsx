@@ -6,7 +6,7 @@
 
 // #################################################################
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
@@ -31,6 +31,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   );
   const { save } = useSaveSubpoint();
   const dispatch = useDispatch();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Debounce state
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
@@ -78,15 +79,30 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
     setDebounceTimer(timer);
   };
 
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, []);
+
   return (
     <Textarea
-      className="no-scrollbar"
+      ref={textareaRef}
+      className="no-scrollbar resize-none overflow-hidden"
       variant="default"
       value={
         selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
       }
       onSelect={handleTextSelection}
-      onChange={(e) => handleUpdateSubpoint(e.target.value)}
+      onChange={(e) => {
+        handleUpdateSubpoint(e.target.value);
+        adjustTextareaHeight();
+      }}
     />
   );
 };
