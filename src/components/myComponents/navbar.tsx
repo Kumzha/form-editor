@@ -2,16 +2,10 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { signOut } from "@/store/user/userSlice";
-import { FaUserCircle } from "react-icons/fa";
-import DropDown from "./dropDown";
-import NewForm from "./newForm";
-import RefreshForms from "./refreshFormButton";
 import { Form } from "@/types/formType";
-import { Progress } from "../ui/progress";
 
 interface NavbarProps {
   form: Form | null;

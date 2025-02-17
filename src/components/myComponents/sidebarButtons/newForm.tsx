@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -26,7 +26,7 @@ import { BASE_URL } from "@/constants/constants";
 import { toast } from "sonner";
 import { FormInterface } from "@/types/formType";
 import { FiPlus } from "react-icons/fi";
-import SidebarItem from "@/components/myComponents/sidebarItem";
+import SidebarItem from "@/components/myComponents/sidebarButtons/sidebarItem";
 
 const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

@@ -4,7 +4,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { setSelectedForm } from "@/store/forms/formSlice";
 import { RiFileList3Line } from "react-icons/ri";
-import SidebarItem from "./sidebarItem";
+import SidebarItem from "./sidebarButtons/sidebarItem";
 
 const DropDown: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   const dispatch = useDispatch();

@@ -1,13 +1,14 @@
 import React from "react";
 import DropDown from "./dropDown";
-import RefreshForms from "./refreshFormButton";
-import NewForm from "./newForm";
+import RefreshForms from "./sidebarButtons/refreshFormButton";
+import NewForm from "./sidebarButtons/newForm";
 import { HiOutlineBookOpen } from "react-icons/hi";
 import { HiOutlineSupport } from "react-icons/hi";
 import { VscFeedback } from "react-icons/vsc";
-import SidebarItem from "./sidebarItem";
+import SidebarItem from "./sidebarButtons/sidebarItem";
 import { TbLayoutSidebarLeftExpandFilled } from "react-icons/tb";
 import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
+import ExportButton from "./sidebarButtons/exportButton";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState<boolean>(true);
@@ -49,6 +50,7 @@ const Sidebar: React.FC = () => {
           </div>
 
           <div className="flex flex-col w-full gap-2">
+            <ExportButton isOpen={isOpen} />
             <SidebarItem
               text="Documentation"
               logo={<HiOutlineBookOpen size={20} />}
