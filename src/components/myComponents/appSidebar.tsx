@@ -9,6 +9,7 @@ import SidebarItem from "./sidebarButtons/sidebarItem";
 import { TbLayoutSidebarLeftExpandFilled } from "react-icons/tb";
 import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
 import ExportButton from "./sidebarButtons/exportButton";
+import UploadExamples from "./sidebarButtons/uploadExamplesButton";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState<boolean>(true);
@@ -51,6 +52,7 @@ const Sidebar: React.FC = () => {
 
           <div className="flex flex-col w-full gap-2">
             <ExportButton isOpen={isOpen} />
+            <UploadExamples isOpen={isOpen} />
             <SidebarItem
               text="Documentation"
               logo={<HiOutlineBookOpen size={20} />}
