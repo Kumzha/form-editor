@@ -1,26 +1,15 @@
 "use client";
 
 import type React from "react";
-// import { useState } from "react";
-import { FaFileAlt, FaEdit } from "react-icons/fa";
+
 import { MdDelete, MdDriveFileRenameOutline } from "react-icons/md";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-// import {
-//   Dialog,
-//   DialogContent,
-//   DialogDescription,
-//   DialogFooter,
-//   DialogHeader,
-//   DialogTitle,
-// } from "@/components/ui/dialog";
-// import { Button } from "@/components/ui/button";
+
+import { RenameFormModal } from "./modals/renameFormModal";
+import { DeleteFormModal } from "./modals/deleteFormModal";
 import { FaPenNib } from "react-icons/fa";
 import Image from "next/image";
+import { useState } from "react";
+import { useRefreshForms } from "@/hooks/useRefreshForms";
 
 interface DocumentCardProps {
   form_name: string;
@@ -37,16 +26,19 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
   // const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const LKT = "/formIcons/LKT.svg";
 
-  // const handleDelete = () => {
-  //   setIsDeleteDialogOpen(true);
-  // };
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const handleRefresh = useRefreshForms();
 
-  // const confirmDelete = () => {
-  //   if (onDelete) {
-  //     onDelete();
-  //   }
-  //   setIsDeleteDialogOpen(false);
-  // };
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleRename = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsRenameModalOpen(true);
+  };
 
   return (
     <>
@@ -75,64 +67,34 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
           <div className="text-[10px] text-gray-500 flex items-center gap-1 mt-1">
             {form_type}
           </div>
-          <div className="flex justify-between">
-            <FaFileAlt className="mt-3" />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div
-                  className="mt-2 rounded-full hover:bg-gray-200 p-1"
-                  onClick={(event) => event.stopPropagation()}
-                >
-                  <FaEdit />
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                <DropdownMenuItem
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
-                >
-                  <MdDelete />
-                  Delete
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    console.log("RENAME");
-                  }}
-                >
-                  <MdDriveFileRenameOutline />
-                  Rename
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <div className="flex mt-3 justify-between">
+            <div
+              className="rounded-lg hover:bg-gray-200 p-1"
+              onClick={(e) => handleRename(e)}
+            >
+              <MdDriveFileRenameOutline size={20} />
+            </div>
+            <div
+              className="rounded-lg hover:bg-gray-200 p-1"
+              onClick={(e) => handleDelete(e)}
+            >
+              <MdDelete size={20} />
+            </div>
           </div>
         </div>
+        <RenameFormModal
+          formName={form_name}
+          open={isRenameModalOpen}
+          onOpenChange={setIsRenameModalOpen}
+          onFormRenamed={() => handleRefresh()}
+        />
+        <DeleteFormModal
+          formName={form_name}
+          open={isDeleteModalOpen}
+          onOpenChange={setIsDeleteModalOpen}
+          onFormDeleted={() => handleRefresh()}
+        ></DeleteFormModal>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      {/* <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Deletion</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {form_name}? This action cannot be
-              undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog> */}
     </>
   );
 };
