@@ -92,7 +92,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   return (
     <Textarea
       ref={textareaRef}
-      className="no-scrollbar resize-none overflow-hidden"
+      className="no-scrollbar resize-none overflow-hidden bg-[#FCFAF4]"
       variant="default"
       value={currentContent}
       onSelect={handleTextSelection}

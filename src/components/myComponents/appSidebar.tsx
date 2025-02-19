@@ -20,14 +20,14 @@ const Sidebar: React.FC = () => {
 
   return (
     <div
-      className="fixed left-0 bg-[#E9E8DF] top-[65px] h-[calc(100vh-76px)] flex flex-col z-50 shadow-sm border rounded-tr-lg rounded-br-lg transition-all duration-300"
+      className="fixed left-0 bg-[#CACACA] top-[65px] h-[calc(100vh-60px)] flex flex-col z-50 transition-all duration-300 border-r-2 border-black"
       style={{
         width: isOpen ? "15%" : "4rem", // Adjust the closed width as needed
       }}
     >
       <div
         onClick={handleToggle}
-        className={`my-2 flex items-center justify-center gap-4 bg-[#E9E8DF] hover:bg-[#c6c4b8] transition-all duration-300 cursor-pointer ${
+        className={`my-2 flex items-center justify-center gap-4 bg-[#CACACA] hover:bg-[#000000] hover:text-white transition-all duration-300 cursor-pointer ${
           isOpen
             ? "ml-auto mr-2 w-10 h-10 rounded-md" // When open: pushed right and square
             : "mx-auto w-[70%] h-10 p-2 rounded-md" // When closed: centered, same height
