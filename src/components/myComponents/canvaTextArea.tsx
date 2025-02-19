@@ -6,10 +6,11 @@
 
 // #################################################################
 
-import React, { useState, useRef, useEffect } from "react";
+import type React from "react";
+import { useState, useRef, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import type { RootState } from "@/store/store";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 import {
   updateSelectedSubpoint,
@@ -33,13 +34,13 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   const dispatch = useDispatch();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Debounce state
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
     null
   );
-
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedText, setSelectedText] = useState<string>("");
+  const currentContent =
+    selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
   const handleTextSelection = (
     event: React.SyntheticEvent<HTMLTextAreaElement>
@@ -58,12 +59,10 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   const handleUpdateSubpoint = (value: string) => {
     dispatch(updateSelectedSubpoint(value));
 
-    // Clear any existing debounce timer
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
 
-    // Start a new debounce timer
     const timer = setTimeout(() => {
       save(
         value,
@@ -88,16 +87,14 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
 
   useEffect(() => {
     adjustTextareaHeight();
-  }, []);
+  }, [currentContent]);
 
   return (
     <Textarea
       ref={textareaRef}
       className="no-scrollbar resize-none overflow-hidden"
       variant="default"
-      value={
-        selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || ""
-      }
+      value={currentContent}
       onSelect={handleTextSelection}
       onChange={(e) => {
         handleUpdateSubpoint(e.target.value);
