@@ -8,13 +8,10 @@ import { signOut } from "@/store/user/userSlice";
 import { Form } from "@/types/formType";
 
 interface NavbarProps {
-  form: Form | null;
+  form?: Form | null;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ form }) => {
-  const dispatch = useDispatch();
-  const router = useRouter();
-
   return (
     <div className="navbar h-10 bg-[#6a6a6d] fixed top-0 left-0 right-0 z-50 border-b-2 border-[#000000]">
       <div className="navbar-start w-[15%]">

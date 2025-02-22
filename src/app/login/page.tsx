@@ -19,7 +19,7 @@ import Cookies from "js-cookie";
 
 interface LoginCredentials {
   email: string;
-  hashed_password: string;
+  password: string;
 }
 
 type Token = {
@@ -81,7 +81,7 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(""); // Reset error before submitting
-    mutate({ email, hashed_password: password });
+    mutate({ email, password: password });
   };
 
   return (

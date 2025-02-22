@@ -21,21 +21,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { BASE_URL } from "@/constants/constants";
 import { toast } from "sonner";
+import { setSelectedForm } from "@/store/forms/formSlice";
 import { FormInterface } from "@/types/formType";
+import { useDispatch } from "react-redux";
 import { FiPlus } from "react-icons/fi";
 import SidebarItem from "@/components/myComponents/sidebarButtons/sidebarItem";
+import { useRefreshForms } from "@/hooks/useRefreshForms";
 
 const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
+  const dispatch = useDispatch();
+  const refresh = useRefreshForms();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formName, setFormName] = useState<string>("");
   const [formType, setFormType] = useState<string>("");
 
   const [formDescription, setFormDescription] = useState<string[]>([]);
-
-  const queryClient = useQueryClient();
 
   const { data: templates } = useQuery<FormInterface[]>({
     queryKey: ["templates"],
@@ -104,8 +107,15 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
 
   const { mutate: createForm } = useMutation<Response, Error>({
     mutationFn: createNewForm,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["fetchForms"] });
+    onSuccess: async () => {
+      const forms = await refresh();
+
+      const newForm = forms.find((form) => form.name === formName);
+
+      if (newForm) {
+        dispatch(setSelectedForm(newForm));
+      }
+
       setIsDialogOpen(false);
       toast("Form has been created", {
         description: `A form by the name ${formName} has been created`,

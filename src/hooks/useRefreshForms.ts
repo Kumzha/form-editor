@@ -5,27 +5,29 @@ import { RootState } from "@/store/store";
 import { setSelectedForm } from "@/store/forms/formSlice";
 import type { Form } from "@/types/formType";
 
-export const useRefreshForms = (data?: Form[]) => {
+export const useRefreshForms = () => {
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
   const { selectedForm } = useSelector((state: RootState) => state.userForms);
 
-  const RefreshForms = async () => {
-    // Invalidate and refetch the forms query
+  const refreshForms = async (): Promise<Form[]> => {
     await queryClient.invalidateQueries({ queryKey: ["fetchForms"] });
-    await queryClient.refetchQueries({ queryKey: ["fetchForms"] });
+    await queryClient.refetchQueries({
+      queryKey: ["fetchForms"],
+    });
 
-    // Find and update the selected form from the refetched data
-    const updatedSelectedForm = data?.find(
-      (form: Form) => form.form_id === selectedForm?.form_id
+    const forms: Form[] = queryClient.getQueryData(["fetchForms"]) || [];
+
+    const updatedSelectedForm = forms.find(
+      (form) => form.form_id === selectedForm?.form_id
     );
 
-    if (!updatedSelectedForm) {
-      return;
+    if (updatedSelectedForm) {
+      dispatch(setSelectedForm(updatedSelectedForm));
     }
 
-    dispatch(setSelectedForm(updatedSelectedForm));
+    return forms;
   };
 
-  return RefreshForms;
+  return refreshForms;
 };
