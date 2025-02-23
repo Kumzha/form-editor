@@ -17,6 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import WithAuth from "@/components/hoc/withAuth";
 
 export default function Home() {
   const router = useRouter();
@@ -81,134 +82,140 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen w-[70%] mx-auto">
-      <Navbar />
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 p-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Profile</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage
-                      src={
-                        profilePicture
-                          ? URL.createObjectURL(profilePicture)
-                          : "/placeholder.svg"
+    <WithAuth>
+      <div className="flex flex-col min-h-screen w-[70%] mx-auto mt-24">
+        <Navbar />
+        <div className="flex flex-1">
+          <Sidebar />
+          <main className="flex-1 p-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Profile</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="w-24 h-24">
+                      <AvatarImage
+                        src={
+                          profilePicture
+                            ? URL.createObjectURL(profilePicture)
+                            : "/placeholder.svg"
+                        }
+                      />
+                      <AvatarFallback>JD</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <Label htmlFor="profile-picture">Profile Picture</Label>
+                      <Input
+                        id="profile-picture"
+                        type="file"
+                        onChange={handleProfilePictureUpload}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        name="firstName"
+                        value={user.firstName}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        name="lastName"
+                        value={user.lastName}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={user.email}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="password">Password (to change)</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={user.password}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="userType">User Type</Label>
+                    <Select
+                      name="userType"
+                      value={user.userType}
+                      onValueChange={(value) =>
+                        setUser((prevUser) => ({
+                          ...prevUser,
+                          userType: value,
+                        }))
                       }
-                    />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <Label htmlFor="profile-picture">Profile Picture</Label>
-                    <Input
-                      id="profile-picture"
-                      type="file"
-                      onChange={handleProfilePictureUpload}
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select user type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="individual">Individual</SelectItem>
+                        <SelectItem value="organization">
+                          Organization
+                        </SelectItem>
+                        <SelectItem value="agency">Agency</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="organization">Organization</Label>
                     <Input
-                      id="firstName"
-                      name="firstName"
-                      value={user.firstName}
+                      id="organization"
+                      name="organization"
+                      value={user.organization}
                       onChange={handleInputChange}
                     />
                   </div>
+
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={user.lastName}
+                    <Label htmlFor="experience">Experience</Label>
+                    <Textarea
+                      id="experience"
+                      name="experience"
+                      value={user.experience}
                       onChange={handleInputChange}
                     />
                   </div>
-                </div>
 
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={user.email}
-                    onChange={handleInputChange}
-                  />
-                </div>
+                  <div>
+                    <Label htmlFor="olderProjects">Older Projects</Label>
+                    <Textarea
+                      id="olderProjects"
+                      name="olderProjects"
+                      value={user.olderProjects}
+                      onChange={handleInputChange}
+                    />
+                  </div>
 
-                <div>
-                  <Label htmlFor="password">Password (to change)</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={user.password}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="userType">User Type</Label>
-                  <Select
-                    name="userType"
-                    value={user.userType}
-                    onValueChange={(value) =>
-                      setUser((prevUser) => ({ ...prevUser, userType: value }))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="organization">Organization</SelectItem>
-                      <SelectItem value="agency">Agency</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="organization">Organization</Label>
-                  <Input
-                    id="organization"
-                    name="organization"
-                    value={user.organization}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="experience">Experience</Label>
-                  <Textarea
-                    id="experience"
-                    name="experience"
-                    value={user.experience}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="olderProjects">Older Projects</Label>
-                  <Textarea
-                    id="olderProjects"
-                    name="olderProjects"
-                    value={user.olderProjects}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="files">Upload Context Files</Label>
-                  {/* <Input
+                  <div>
+                    <Label htmlFor="files">Upload Context Files</Label>
+                    {/* <Input
                     id="files"
                     type="file"
                     multiple
@@ -221,14 +228,15 @@ export default function Home() {
                       </div>
                     ))}
                   </div> */}
-                </div>
+                  </div>
 
-                <Button type="submit">Update Profile</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </main>
+                  <Button type="submit">Update Profile</Button>
+                </form>
+              </CardContent>
+            </Card>
+          </main>
+        </div>
       </div>
-    </div>
+    </WithAuth>
   );
 }
