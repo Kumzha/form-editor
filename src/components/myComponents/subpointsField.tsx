@@ -8,6 +8,7 @@ import { setSelectedSubpoint } from "@/store/forms/formSlice";
 import ModifyButton from "./modifyButton";
 import InspireButton from "./inspireButton";
 import CanvaTextArea from "./canvaTextArea";
+import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 
 const SubpointsField = () => {
@@ -65,9 +66,16 @@ const SubpointsField = () => {
                 </div>
               )}
             </div>
-            {selectedSubpoint === index ? (
-              <>
-                <div className="flex gap-1 items-center">
+            {selectedSubpoint === index && (
+              <AnimatePresence>
+                <motion.div
+                  key="modify-section"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex gap-1 items-center"
+                >
                   <Input
                     onChange={(e) => setUserPrompt(e.target.value)}
                     placeholder="Enter your prompt"
@@ -80,10 +88,8 @@ const SubpointsField = () => {
                     formName={selectedForm?.name}
                     funcAfterSuccess={() => setUserPrompt("")}
                   />
-                </div>
-              </>
-            ) : (
-              <div className="h-[36px]"></div>
+                </motion.div>
+              </AnimatePresence>
             )}
           </div>
         )

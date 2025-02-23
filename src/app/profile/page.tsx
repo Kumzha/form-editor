@@ -1,7 +1,12 @@
 "use client";
 
+import type React from "react";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {
+  GRANT_TYPE_OPTIONS,
+  type UserData,
+  type GrantType,
+} from "@/types/userType";
 import Navbar from "@/components/myComponents/navbar";
 import Sidebar from "@/components/myComponents/appSidebar";
 import { Button } from "@/components/ui/button";
@@ -17,54 +22,45 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import WithAuth from "@/components/hoc/withAuth";
+import { useUserQuery } from "@/hooks/useUserQuery";
 
 export default function Home() {
-  const router = useRouter();
-  const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
+  const { data: userData, isLoading } = useUserQuery();
+  const [user, setUser] = useState<UserData>({
+    id: "",
     email: "",
-    password: "",
-    organization: "",
-    experience: "",
-    olderProjects: "",
-    userType: "individual",
+    first_name: "",
+    last_name: "",
+    grant_types: [],
+    user_type: "",
+    organisation_name: "",
+    organisation_description: "",
+    list_of_file_names: [],
   });
-  //   const [files, setFiles] = useState([]);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [customGrantType, setCustomGrantType] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.log("No token found inside main page useEffect");
-      router.push("/login");
-    } else {
-      // Fetch user data here
-      // For now, we'll use dummy data
-      setUser({
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
-        password: "",
-        organization: "Acme Inc.",
-        experience: "10 years in software development",
-        olderProjects: "Project A, Project B",
-        userType: "individual",
-      });
+    if (userData) {
+      console.log("userData:", userData);
+      setUser((prevUser) => ({
+        ...prevUser,
+        ...userData,
+        organisation_name: userData.organisation_name || "",
+        organisation_description: userData.organisation_description || "",
+      }));
     }
-  }, [router]);
+  }, [userData]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleInputChange = (e: { target: { name: any; value: any } }) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
   };
-
-  //   const handleFileUpload = (e) => {
-  //     const newFiles = Array.from(e.target.files);
-  //     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-  //   };
 
   const handleProfilePictureUpload = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -73,17 +69,54 @@ export default function Home() {
     setProfilePicture(file);
   };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log("User data:", user);
-    // console.log("Files:", files);
-    console.log("Profile picture:", profilePicture);
+  const handleAddGrantType = (value: GrantType) => {
+    if (value && !user.grant_types.includes(value)) {
+      setUser((prevUser) => ({
+        ...prevUser,
+        grant_types: [...prevUser.grant_types, value],
+      }));
+    }
+    setCustomGrantType("");
   };
+
+  const handleRemoveGrantType = (grantType: GrantType) => {
+    setUser((prevUser) => ({
+      ...prevUser,
+      grant_types: prevUser.grant_types.filter((type) => type !== grantType),
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/update-profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      alert("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <WithAuth>
-      <div className="flex flex-col min-h-screen w-[70%] mx-auto mt-24">
+      <div className="flex flex-col min-h-screen w-[70%] max-w-[1000px] mx-auto mt-24">
         <Navbar />
         <div className="flex flex-1">
           <Sidebar />
@@ -103,7 +136,10 @@ export default function Home() {
                             : "/placeholder.svg"
                         }
                       />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarFallback>
+                        {user.first_name.charAt(0)}
+                        {user.last_name.charAt(0)}
+                      </AvatarFallback>
                     </Avatar>
                     <div>
                       <Label htmlFor="profile-picture">Profile Picture</Label>
@@ -111,26 +147,27 @@ export default function Home() {
                         id="profile-picture"
                         type="file"
                         onChange={handleProfilePictureUpload}
+                        accept="image/*"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="name">First Name</Label>
                       <Input
-                        id="firstName"
-                        name="firstName"
-                        value={user.firstName}
+                        id="name"
+                        name="name"
+                        value={user.first_name}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="last_name">Last Name</Label>
                       <Input
-                        id="lastName"
-                        name="lastName"
-                        value={user.lastName}
+                        id="last_name"
+                        name="last_name"
+                        value={user.last_name}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -141,32 +178,20 @@ export default function Home() {
                     <Input
                       id="email"
                       name="email"
-                      type="email"
                       value={user.email}
                       onChange={handleInputChange}
+                      type="email"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="password">Password (to change)</Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={user.password}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="userType">User Type</Label>
+                    <Label htmlFor="user_type">User Type</Label>
                     <Select
-                      name="userType"
-                      value={user.userType}
+                      value={user.user_type || "personal"}
                       onValueChange={(value) =>
                         setUser((prevUser) => ({
                           ...prevUser,
-                          userType: value,
+                          user_type: value,
                         }))
                       }
                     >
@@ -174,60 +199,115 @@ export default function Home() {
                         <SelectValue placeholder="Select user type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="individual">Individual</SelectItem>
-                        <SelectItem value="organization">
-                          Organization
+                        <SelectItem value="personal">Personal</SelectItem>
+                        <SelectItem value="Organisation">
+                          Organisation
                         </SelectItem>
                         <SelectItem value="agency">Agency</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div>
-                    <Label htmlFor="organization">Organization</Label>
-                    <Input
-                      id="organization"
-                      name="organization"
-                      value={user.organization}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="experience">Experience</Label>
-                    <Textarea
-                      id="experience"
-                      name="experience"
-                      value={user.experience}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="olderProjects">Older Projects</Label>
-                    <Textarea
-                      id="olderProjects"
-                      name="olderProjects"
-                      value={user.olderProjects}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="files">Upload Context Files</Label>
-                    {/* <Input
-                    id="files"
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                  />
-                  <div className="mt-2">
-                    {files.map((file, index) => (
-                      <div key={index} className="text-sm">
-                        {file.name}
+                  {user.user_type === "organisation" && (
+                    <>
+                      <div>
+                        <Label htmlFor="organisation_name">
+                          organisation Name
+                        </Label>
+                        <Input
+                          id="organisation_name"
+                          name="organisation_name"
+                          value={user.organisation_name}
+                          onChange={handleInputChange}
+                        />
                       </div>
-                    ))}
-                  </div> */}
+                      <div>
+                        <Label htmlFor="organisation_description">
+                          organisation Description
+                        </Label>
+                        <Textarea
+                          id="organisation_description"
+                          name="organisation_description"
+                          value={user.organisation_description}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label>Grant Types</Label>
+                    <Select onValueChange={handleAddGrantType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select grant type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GRANT_TYPE_OPTIONS.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Input
+                        placeholder="Add custom grant type"
+                        value={customGrantType}
+                        onChange={(e) => setCustomGrantType(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddGrantType(customGrantType);
+                          }
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => handleAddGrantType(customGrantType)}
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {user.grant_types.map((type) => (
+                        <Badge key={type} variant="secondary">
+                          {type}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveGrantType(type)}
+                            className="ml-1 hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Files</Label>
+                    <div className="mt-2">
+                      {user.list_of_file_names.map((fileName, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <span className="text-sm">{fileName}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setUser((prevUser) => ({
+                                ...prevUser,
+                                list_of_file_names:
+                                  prevUser.list_of_file_names.filter(
+                                    (_, i) => i !== index
+                                  ),
+                              }))
+                            }
+                            className="text-destructive hover:text-destructive/80"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <Button type="submit">Update Profile</Button>

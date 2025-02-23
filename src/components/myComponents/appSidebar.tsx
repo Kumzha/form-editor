@@ -5,7 +5,11 @@ import { useState, useEffect } from "react";
 import DropDown from "./dropDown";
 import RefreshForms from "./sidebarButtons/refreshFormButton";
 import NewForm from "./sidebarButtons/newForm";
-import { HiOutlineBookOpen, HiOutlineSupport } from "react-icons/hi";
+import {
+  HiOutlineBookOpen,
+  HiOutlineSupport,
+  HiOutlineUser,
+} from "react-icons/hi";
 import { VscFeedback } from "react-icons/vsc";
 import SidebarItem from "./sidebarButtons/sidebarItem";
 import {
@@ -14,10 +18,12 @@ import {
 } from "react-icons/tb";
 import ExportButton from "./sidebarButtons/exportButton";
 import UploadExamples from "./sidebarButtons/uploadExamplesButton";
+import { useRouter } from "next/navigation";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -92,6 +98,12 @@ const Sidebar: React.FC = () => {
               text="Feedback"
               logo={<VscFeedback size={20} />}
               isOpen={isOpen}
+            />
+            <SidebarItem
+              text="Profile"
+              logo={<HiOutlineUser size={20} />}
+              isOpen={isOpen}
+              onClick={() => router.push("/profile")}
             />
           </div>
         </div>
