@@ -53,14 +53,14 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
                 className="w-2/3 h-full object-contain"
               />
             ) : (
-              <FaPenNib className="w-2/3 h-full text-[#996553]" />
+              <FaPenNib className="w-2/3 h-full text-[#524CE7]" />
             )}
           </div>
         </div>
 
         <div className="mt-3 space-y-2">
           <div className="text-sm font-semibold truncate">{form_name}</div>
-          <div className="text-xs text-gray-500 flex items-center gap-1 h-6">
+          <div className="text-[10px] text-gray-500 flex items-center gap-1 h-6">
             {form_type}
           </div>
           <div className="flex justify-between mt-2">
