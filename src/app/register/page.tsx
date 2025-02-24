@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface InitialRegisterCredentials {
   email: string;
@@ -130,6 +131,7 @@ const RegisterPage = () => {
       console.log(data);
       localStorage.setItem("authToken", data.token);
       Cookies.set("authToken", data.token, { expires: 7 });
+      toast.success("Initial registration successful!");
       setStep(2);
     },
     onError: (error: Error) => {
@@ -151,6 +153,7 @@ const RegisterPage = () => {
           email: email,
         })
       );
+      toast.success("Account created successfully!");
       router.push("/");
     },
     onError: (error: Error) => {
@@ -341,9 +344,9 @@ const RegisterPage = () => {
           <CardFooter>
             <div className="text-sm text-gray-500">
               <div>Already have an account?</div>
-              <Button variant="link" onClick={() => router.push("/login")}>
-                Sign In
-              </Button>
+              <a href="/login" className="text-blue-500 hover:underline">
+                Login
+              </a>
             </div>
           </CardFooter>
         ) : (

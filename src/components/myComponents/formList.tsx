@@ -8,6 +8,7 @@ import { setSelectedForm, setUserForms } from "@/store/forms/formSlice";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchForms } from "@/lib/utils";
 import DocumentCard from "./documentCard";
+import NoProposalScreen from "./noProposalsScreen";
 
 const FormList: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const FormList: React.FC = () => {
     return (
       <div className="container mx-auto px-4 py-8 mt-14">
         <h1 className="text-2xl md:text-3xl font-bold mb-6">My Proposals</h1>
-        <p>No proposals found.</p>
+        <NoProposalScreen />
       </div>
     );
   }

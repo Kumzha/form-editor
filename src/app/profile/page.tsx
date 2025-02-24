@@ -28,6 +28,7 @@ import WithAuth from "@/components/hoc/withAuth";
 import { useUserQuery } from "@/hooks/useUserQuery";
 import { BASE_URL } from "@/constants/constants";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function Home() {
   const { data: userData, isLoading } = useUserQuery();
@@ -114,6 +115,8 @@ export default function Home() {
       await queryClient.refetchQueries({
         queryKey: ["user"],
       });
+
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile");

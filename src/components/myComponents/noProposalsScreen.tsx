@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "../../ui/button";
+import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "../../ui/textarea";
+import { Textarea } from "../ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,11 +27,11 @@ import { toast } from "sonner";
 import { setSelectedForm } from "@/store/forms/formSlice";
 import { FormInterface } from "@/types/formType";
 import { useDispatch } from "react-redux";
-import { FiPlus } from "react-icons/fi";
-import SidebarItem from "@/components/myComponents/sidebarButtons/sidebarItem";
 import { useRefreshForms } from "@/hooks/useRefreshForms";
+import { PlusCircle, FileText } from "lucide-react";
+import { motion } from "framer-motion";
 
-const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
+const NoProposalScreen: React.FC = () => {
   const dispatch = useDispatch();
   const refresh = useRefreshForms();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -160,11 +160,50 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
-        <SidebarItem
-          text="Create"
-          logo={<FiPlus size={20} />}
-          isOpen={isOpen}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center justify-center min-h-[400px] p-8 text-center rounded-lg"
+        >
+          <div className="relative mb-6">
+            <motion.div
+              animate={{
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            >
+              <FileText className="w-16 h-16 text-muted-foreground/60" />
+            </motion.div>
+            <motion.div
+              className="absolute -right-2 -top-2"
+              animate={{
+                rotate: [0, 15, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+              }}
+            >
+              <PlusCircle className="w-6 h-6 text-primary" />
+            </motion.div>
+          </div>
+
+          <h3 className="text-lg font-semibold mb-2">No proposals yet</h3>
+          <p className="text-muted-foreground mb-6 max-w-sm">
+            Create your first proposal to get started. It only takes a few
+            minutes to draft your ideas.
+          </p>
+
+          <Button size="lg" className="gap-2">
+            <PlusCircle className="w-4 h-4" />
+            Create New Proposal
+          </Button>
+        </motion.div>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1000px]">
         <DialogHeader>
@@ -260,4 +299,4 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   );
 };
 
-export default NewForm;
+export default NoProposalScreen;

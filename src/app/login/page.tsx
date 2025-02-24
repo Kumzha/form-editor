@@ -125,7 +125,11 @@ const LoginPage = () => {
         <CardFooter>
           <div className="text-sm text-gray-500">
             <div>Don’t have an account?</div>
-            <div>Contact us at - </div>
+            <div>
+              <a href="/register" className="text-blue-500 hover:underline">
+                Register
+              </a>
+            </div>
           </div>
         </CardFooter>
       </Card>
