@@ -4,10 +4,12 @@ import { fetchUser, signOut } from "@/store/user/userSlice";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store/store";
 import { unwrapResult } from "@reduxjs/toolkit";
+import { useUserQuery } from "@/hooks/useUserQuery";
 
 const WithAuth = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { data: userData } = useUserQuery();
   const isSignedIn = useSelector((state: RootState) => state.user.isSignedIn);
   const userStatus = useSelector((state: RootState) => state.user.status);
 
@@ -19,7 +21,7 @@ const WithAuth = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    if (!isSignedIn && token) {
+    if (!userData && token) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dispatch(fetchUser() as any)
         .then(unwrapResult)
@@ -29,7 +31,7 @@ const WithAuth = ({ children }: { children: React.ReactNode }) => {
           router.push("/login");
         });
     }
-  }, [isSignedIn, userStatus, dispatch, router]);
+  }, [isSignedIn, userStatus, dispatch, router, userData]);
 
   if (!isSignedIn) {
     return null;

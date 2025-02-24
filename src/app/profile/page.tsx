@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import WithAuth from "@/components/hoc/withAuth";
 import { useUserQuery } from "@/hooks/useUserQuery";
+import { BASE_URL } from "@/constants/constants";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
   const { data: userData, isLoading } = useUserQuery();
@@ -43,9 +45,10 @@ export default function Home() {
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [customGrantType, setCustomGrantType] = useState("");
 
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     if (userData) {
-      console.log("userData:", userData);
       setUser((prevUser) => ({
         ...prevUser,
         ...userData,
@@ -59,6 +62,7 @@ export default function Home() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
   };
 
@@ -89,10 +93,12 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("/api/update-profile", {
+      const authToken = localStorage.getItem("authToken");
+      const response = await fetch(`${BASE_URL}/me/me/update-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(user),
       });
@@ -103,7 +109,11 @@ export default function Home() {
 
       const updatedUser = await response.json();
       setUser(updatedUser);
-      alert("Profile updated successfully");
+
+      queryClient.invalidateQueries({ queryKey: ["user"] });
+      await queryClient.refetchQueries({
+        queryKey: ["user"],
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile");
@@ -111,7 +121,15 @@ export default function Home() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <Navbar />
+        <Sidebar />
+        <div className="flex justify-center items-center h-screen mt-14">
+          <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -154,10 +172,10 @@ export default function Home() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">First Name</Label>
+                      <Label htmlFor="first_name">First Name</Label>
                       <Input
-                        id="name"
-                        name="name"
+                        id="firt_name"
+                        name="first_name"
                         value={user.first_name}
                         onChange={handleInputChange}
                       />
@@ -208,11 +226,11 @@ export default function Home() {
                     </Select>
                   </div>
 
-                  {user.user_type === "organisation" && (
+                  {user.user_type === "Organisation" && (
                     <>
                       <div>
                         <Label htmlFor="organisation_name">
-                          organisation Name
+                          Organisation Name
                         </Label>
                         <Input
                           id="organisation_name"
@@ -223,13 +241,15 @@ export default function Home() {
                       </div>
                       <div>
                         <Label htmlFor="organisation_description">
-                          organisation Description
+                          Organisation Description
                         </Label>
                         <Textarea
+                          className="border"
                           id="organisation_description"
                           name="organisation_description"
                           value={user.organisation_description}
                           onChange={handleInputChange}
+                          placeholder="Write a couple sentences about your organisation, what it does, what are the goals."
                         />
                       </div>
                     </>
