@@ -50,10 +50,10 @@ const DocumentCard: React.FC<DocumentCardProps> = ({
                 alt="LKT Icon"
                 width={80}
                 height={80}
-                className="w-2/3 h-full object-contain"
+                className="w-1/2 h-full object-contain"
               />
             ) : (
-              <FaPenNib className="w-2/3 h-full text-[#524CE7]" />
+              <FaPenNib className="w-1/2 h-full text-[#524CE7]" />
             )}
           </div>
         </div>
