@@ -57,6 +57,7 @@ const GRANT_TYPE_OPTIONS = [
   "Creative Europe",
   "LIFE Programme",
   "Digital Europe",
+  "LKT",
 ] as const;
 
 const initialRegister = async (
