@@ -71,10 +71,8 @@ const config: Config = {
       },
     },
   },
-  daisyui: {
-    themes: false,
-  },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  plugins: [require("tailwindcss-animate"), require("daisyui")],
+  plugins: [require("tailwindcss-animate")],
 };
+
 export default config;

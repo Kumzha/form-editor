@@ -19,6 +19,7 @@ import {
 import ExportButton from "./sidebarButtons/exportButton";
 import UploadExamples from "./sidebarButtons/uploadExamplesButton";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +53,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div
-      className={`fixed left-0 bg-[#CACACA] top-[64px] h-[calc(100vh-60px)] flex flex-col z-50 transition-all duration-300 border-r-2 border-black ${
+      className={`fixed left-0 bg-[#CACACA] top-[64px] h-[calc(100vh-60px)] flex flex-col z-50 transition-all duration-300 border-r-2 border-[#6a6a6d] ${
         isOpen ? "md:w-[15%]" : "w-16"
       }`}
     >
@@ -93,6 +94,7 @@ const Sidebar: React.FC = () => {
               text="Support"
               logo={<HiOutlineSupport size={20} />}
               isOpen={isOpen}
+              onClick={() => toast.error("Coming Soon!")}
             />
             <SidebarItem
               text="Feedback"
