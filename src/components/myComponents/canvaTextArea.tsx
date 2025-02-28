@@ -6,6 +6,8 @@
 
 // #################################################################
 
+"use client";
+
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "../ui/textarea";
@@ -80,19 +82,40 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
+      // Reset height to auto to get the correct scrollHeight
       textareaRef.current.style.height = "auto";
+
+      // Set the height to match the content exactly
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+      // Always keep overflow hidden since we want the textarea to expand
+      textareaRef.current.style.overflowY = "hidden";
     }
   };
 
+  // Adjust height when content changes
   useEffect(() => {
     adjustTextareaHeight();
   }, [currentContent]);
 
+  // Also adjust height when window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      adjustTextareaHeight();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <Textarea
       ref={textareaRef}
-      className="no-scrollbar resize-none overflow-hidden bg-[#FCFAF4]"
+      className="resize-none bg-[#FCFAF4]"
+      style={{
+        minHeight: "2.5rem",
+      }}
       variant="default"
       value={currentContent}
       onSelect={handleTextSelection}

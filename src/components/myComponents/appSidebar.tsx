@@ -3,7 +3,6 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import DropDown from "./dropDown";
-import RefreshForms from "./sidebarButtons/refreshFormButton";
 import NewForm from "./sidebarButtons/newForm";
 import {
   HiOutlineBookOpen,
@@ -20,6 +19,7 @@ import ExportButton from "./sidebarButtons/exportButton";
 import UploadExamples from "./sidebarButtons/uploadExamplesButton";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import FeedbackButton from "./sidebarButtons/feedbackButton";
 
 const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,16 +79,16 @@ const Sidebar: React.FC = () => {
           <div className="flex flex-col w-full gap-2">
             <NewForm isOpen={isOpen} />
             <DropDown isOpen={isOpen} />
-            <RefreshForms isOpen={isOpen} />
+            <ExportButton isOpen={isOpen} />
           </div>
 
           <div className="flex flex-col w-full gap-2">
-            <ExportButton isOpen={isOpen} />
             <UploadExamples isOpen={isOpen} />
             <SidebarItem
               text="Documentation"
               logo={<HiOutlineBookOpen size={20} />}
               isOpen={isOpen}
+              onClick={() => toast.error("Coming Soon!")}
             />
             <SidebarItem
               text="Support"
@@ -96,6 +96,7 @@ const Sidebar: React.FC = () => {
               isOpen={isOpen}
               onClick={() => toast.error("Coming Soon!")}
             />
+            <FeedbackButton isOpen={isOpen} />
             <SidebarItem
               text="Feedback"
               logo={<VscFeedback size={20} />}

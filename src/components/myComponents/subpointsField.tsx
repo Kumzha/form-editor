@@ -34,7 +34,7 @@ const SubpointsField = () => {
     ]?.prompt || "";
 
   return (
-    <div className="bg-[#CACACA] w-full flex flex-col gap-4 rounded pb-3">
+    <div className="bg-[#CACACA] w-full flex flex-col gap-4 rounded pb-10">
       {selectedForm?.form_type.questions[selectedPoint].subpoints.map(
         (subpoint, index) => (
           <div key={index} className="flex flex-col gap-1">
@@ -80,6 +80,7 @@ const SubpointsField = () => {
                     onChange={(e) => setUserPrompt(e.target.value)}
                     placeholder="Enter your prompt"
                     className="bg-[#FCFAF4] mx-1 w-1/3 rounded-2xl border-none"
+                    value={userPrompt}
                   />
                   <ModifyButton
                     userPrompt={userPrompt}

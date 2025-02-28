@@ -43,46 +43,7 @@ const ExportButton: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
     );
     paragraphs.push(new Paragraph({ text: "" })); // Empty line for spacing
 
-    // Initial Context Section
-    paragraphs.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "Initial Context",
-            bold: true,
-            size: 28,
-          }),
-        ],
-      })
-    );
-
-    selectedForm.form_type.initial_context_questions.forEach(
-      (question, index) => {
-        const answer = selectedForm.initial_context[index] || "";
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Q: ${question}`,
-                bold: true,
-                size: 24, // 12pt
-              }),
-            ],
-          })
-        );
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `A: ${answer}`,
-                size: 24,
-              }),
-            ],
-          })
-        );
-        paragraphs.push(new Paragraph({ text: "" }));
-      }
-    );
+    // Removed the Initial Context section export
 
     // Iterate over question groups from form_type.questions
     selectedForm.form_type.questions.forEach((group, groupIndex) => {

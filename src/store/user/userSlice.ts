@@ -26,7 +26,6 @@ export const fetchUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     const token = Cookies.get("authToken"); // Retrieve token from cookies
     if (!token) return rejectWithValue("No token found");
-
     try {
       const response = await fetch(`${BASE_URL}/me`, {
         method: "GET",
