@@ -8,8 +8,7 @@
 
 "use client";
 
-import type React from "react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Textarea } from "../ui/textarea";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
@@ -29,6 +28,7 @@ function isFormIdObject(value: any): value is { $oid: string } {
 }
 
 const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
     (state: RootState) => state.userForms
   );
@@ -41,6 +41,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedText, setSelectedText] = useState<string>("");
+
   const currentContent =
     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
@@ -58,64 +59,61 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
     }
   };
 
-  const handleUpdateSubpoint = (value: string) => {
-    dispatch(updateSelectedSubpoint(value));
-
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-
-    const timer = setTimeout(() => {
-      save(
-        value,
-        selectedSubpoint,
-        selectedPoint,
-        isFormIdObject(selectedForm?.form_id)
-          ? selectedForm.form_id.$oid
-          : selectedForm?.form_id || "",
-        selectedForm?.name || ""
+  const handleUpdateSubpoint = useCallback(
+    (value: string) => {
+      // Update this specific subpoint
+      dispatch(
+        updateSelectedSubpoint({
+          point: selectedPoint,
+          subpoint: index,
+          content: value,
+        })
       );
-    }, 5000);
 
-    setDebounceTimer(timer);
-  };
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+
+      const timer = setTimeout(() => {
+        save(
+          value,
+          index,
+          selectedPoint,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+      }, 5000);
+
+      setDebounceTimer(timer);
+    },
+    [debounceTimer, dispatch, index, save, selectedForm, selectedPoint]
+  );
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
-      // Reset height to auto to get the correct scrollHeight
       textareaRef.current.style.height = "auto";
-
-      // Set the height to match the content exactly
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      // Always keep overflow hidden since we want the textarea to expand
       textareaRef.current.style.overflowY = "hidden";
     }
   };
 
-  // Adjust height when content changes
   useEffect(() => {
     adjustTextareaHeight();
   }, [currentContent]);
 
-  // Also adjust height when window is resized
   useEffect(() => {
-    const handleResize = () => {
-      adjustTextareaHeight();
-    };
-
+    const handleResize = () => adjustTextareaHeight();
     window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
     <Textarea
       ref={textareaRef}
       className="resize-none bg-[#FCFAF4]"
-      style={{
-        minHeight: "2.5rem",
-      }}
+      style={{ minHeight: "2.5rem" }}
       variant="default"
       value={currentContent}
       onSelect={handleTextSelection}

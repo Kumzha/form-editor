@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/constants/constants";
@@ -13,6 +13,7 @@ interface ModifyProps {
   subpointText: string;
   query: string;
   formName: string;
+  subpointIndex: number;
   funcAfterSuccess: () => void;
 }
 
@@ -31,6 +32,9 @@ type ApiResponse = {
 function isFormIdObject(value: any): value is { $oid: string } {
   return value && typeof value === "object" && "$oid" in value;
 }
+
+// Track active modify operations
+const activeModifyOperations = new Set<string>();
 
 // Note: Removed useSelector from this function.
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
@@ -58,25 +62,48 @@ const ModifyButton: React.FC<ModifyProps> = ({
   subpointText,
   query,
   formName,
+  subpointIndex,
   funcAfterSuccess,
 }) => {
   const dispatch = useDispatch();
 
-  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+  const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
   );
 
   const { save } = useSaveSubpoint();
 
+  // Store the target point and subpoint
+  const targetPoint = useRef(selectedPoint);
+  const targetSubpoint = useRef(subpointIndex);
+
+  // Create a key for this specific modification
+  const modifyKey = `${selectedPoint}-${subpointIndex}`;
+  const isModifyActive = activeModifyOperations.has(modifyKey);
+
   const modifyMutation = useMutation<ApiResponse, Error, UpdateFieldRequest>({
     mutationFn: updateField,
+    onMutate: () => {
+      // Mark this operation as active
+      activeModifyOperations.add(modifyKey);
+      // Store the current targets
+      targetPoint.current = selectedPoint;
+      targetSubpoint.current = subpointIndex;
+    },
     onSuccess: (data) => {
-      dispatch(updateSelectedSubpoint(data.result));
+      // Update the specific subpoint that was modified
+      dispatch(
+        updateSelectedSubpoint({
+          point: targetPoint.current,
+          subpoint: targetSubpoint.current,
+          content: data.result,
+        })
+      );
 
       save(
         data.result,
-        selectedSubpoint,
-        selectedPoint,
+        targetSubpoint.current,
+        targetPoint.current,
         isFormIdObject(selectedForm?.form_id)
           ? selectedForm.form_id.$oid
           : selectedForm?.form_id || "",
@@ -86,10 +113,13 @@ const ModifyButton: React.FC<ModifyProps> = ({
     },
     onError: (error) => {
       console.error("Error updating form:", error.message);
+      toast.error(`Error: ${error.message}`);
+    },
+    onSettled: () => {
+      // Remove from active operations
+      activeModifyOperations.delete(modifyKey);
     },
   });
-
-  const isFetching = modifyMutation.status === "pending";
 
   const handleSubmit = async () => {
     if (!userPrompt || !query || !formName || !subpointText) {
@@ -97,7 +127,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
       return;
     }
 
-    if (isFetching) return;
+    if (isModifyActive) return;
 
     const data: UpdateFieldRequest = {
       user_query: userPrompt,

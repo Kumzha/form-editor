@@ -50,14 +50,20 @@ const userFormsSlice = createSlice({
     setSelectedSubpoint(state, action: PayloadAction<number>) {
       state.selectedSubpoint = action.payload;
     },
-    updateSelectedSubpoint(state, action: PayloadAction<string>) {
-      const subpoint =
-        state.selectedForm?.points?.[state.selectedPoint]?.subpoints?.[
-          state.selectedSubpoint
-        ];
+    updateSelectedSubpoint(
+      state,
+      action: PayloadAction<{
+        point: number;
+        subpoint: number;
+        content: string;
+      }>
+    ) {
+      const { point, subpoint, content } = action.payload;
+      const targetSubpoint =
+        state.selectedForm?.points?.[point]?.subpoints?.[subpoint];
 
-      if (subpoint) {
-        subpoint.content = action.payload;
+      if (targetSubpoint) {
+        targetSubpoint.content = content;
       }
     },
   },

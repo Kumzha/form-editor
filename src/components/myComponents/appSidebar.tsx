@@ -9,7 +9,6 @@ import {
   HiOutlineSupport,
   HiOutlineUser,
 } from "react-icons/hi";
-import { VscFeedback } from "react-icons/vsc";
 import SidebarItem from "./sidebarButtons/sidebarItem";
 import {
   TbLayoutSidebarLeftExpandFilled,
@@ -97,11 +96,6 @@ const Sidebar: React.FC = () => {
               onClick={() => toast.error("Coming Soon!")}
             />
             <FeedbackButton isOpen={isOpen} />
-            <SidebarItem
-              text="Feedback"
-              logo={<VscFeedback size={20} />}
-              isOpen={isOpen}
-            />
             <SidebarItem
               text="Profile"
               logo={<HiOutlineUser size={20} />}

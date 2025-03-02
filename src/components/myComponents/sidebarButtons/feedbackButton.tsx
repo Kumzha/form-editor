@@ -179,28 +179,6 @@ const FeedbackButton: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="priority">Priority</Label>
-              <Select
-                value={formData.priority}
-                onValueChange={(value) =>
-                  handleInputChange("priority", value as TicketPriority)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TicketPriority.LOW}>Low</SelectItem>
-                  <SelectItem value={TicketPriority.MEDIUM}>Medium</SelectItem>
-                  <SelectItem value={TicketPriority.HIGH}>High</SelectItem>
-                  <SelectItem value={TicketPriority.CRITICAL}>
-                    Critical
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-2">
               <Label htmlFor="subject">Subject</Label>
               <Input
                 id="subject"
@@ -222,7 +200,7 @@ const FeedbackButton: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
                 onChange={(e) =>
                   handleInputChange("description", e.target.value)
                 }
-                className={errors.description ? "border-red-500" : ""}
+                className={errors.description ? "border-red-500" : "border"}
               />
               {errors.description && (
                 <p className="text-sm text-red-500">{errors.description}</p>
