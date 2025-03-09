@@ -1,3 +1,4 @@
+// In selectonPopup.tsx
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,8 +30,7 @@ export function SelectionPopup({
   } | null>(null);
   const [mounted, setMounted] = React.useState(false);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+  const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
   );
 
@@ -46,32 +46,36 @@ export function SelectionPopup({
     return () => setMounted(false);
   }, []);
 
-  // Calculate position for the popup using ResizeObserver
+  // Calculate position for the popup relative to its parent container
   React.useEffect(() => {
     if (!mounted || !popupRef.current || !parentRef.current) return;
 
     const calculatePosition = () => {
       const popupRect = popupRef.current?.getBoundingClientRect();
-      if (!popupRect) return;
+      if (!popupRect || !parentRef.current) return;
 
-      // Get position relative to viewport
-      const top = rect.top - popupRect.height - 10;
-      const left = rect.left + rect.width / 2 - popupRect.width / 2;
+      // Get parent container's position
+      const parentRect = parentRef.current.getBoundingClientRect();
 
-      // Get viewport dimensions
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
+      // Calculate the position relative to the parent component
+      // Position above the selection, relative to parent
+      const relativeTop = rect.top - parentRect.top - popupRect.height - 10;
 
-      // Ensure popup stays within viewport
+      // Center horizontally on the selection, relative to parent
+      const relativeLeft =
+        rect.left - parentRect.left + rect.width / 2 - popupRect.width / 2;
+
+      // Ensure popup stays within parent bounds
       const safeTop = Math.max(
         10,
-        Math.min(top, viewportHeight - popupRect.height - 10)
+        Math.min(relativeTop, parentRect.height - popupRect.height - 10)
       );
       const safeLeft = Math.max(
         10,
-        Math.min(left, viewportWidth - popupRect.width - 10)
+        Math.min(relativeLeft, parentRect.width - popupRect.width - 10)
       );
 
+      // Position the popup by setting absolute positioning relative to parent
       setPosition({ top: safeTop, left: safeLeft });
     };
 
@@ -118,7 +122,7 @@ export function SelectionPopup({
   const popupElement = (
     <div
       ref={popupRef}
-      className="fixed z-[9999] bg-white shadow-lg rounded-md p-2 border border-gray-200 w-2/6"
+      className="absolute z-[9999] bg-white shadow-lg rounded-md p-2 border border-gray-200 w-2/6"
       style={{
         visibility: position ? "visible" : "hidden",
         top: position?.top ?? 0,
@@ -150,6 +154,8 @@ export function SelectionPopup({
     </div>
   );
 
-  // Only render on client-side and use portal
-  return mounted ? createPortal(popupElement, document.body) : null;
+  // Render relative to parent instead of document.body, with null check
+  return mounted && parentRef.current
+    ? createPortal(popupElement, parentRef.current)
+    : null;
 }

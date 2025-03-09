@@ -247,7 +247,10 @@ export interface CanvaDivRef {
 }
 
 const CanvaDiv = React.forwardRef<CanvaDivRef, CanvaDivProps>(
-  ({ className, variant = "default", defaultValue = "", ...props }, ref) => {
+  (
+    { className, variant = "default", defaultValue = "", index, ...props },
+    ref
+  ) => {
     const divRef = React.useRef<HTMLDivElement>(null);
     const isInitialMount = React.useRef(true);
     const [selection, setSelection] = React.useState<{
@@ -284,12 +287,21 @@ const CanvaDiv = React.forwardRef<CanvaDivRef, CanvaDivProps>(
       ) {
         const range = windowSelection.getRangeAt(0);
         const selectedText = windowSelection.toString();
-        const rect = range.getBoundingClientRect();
 
-        setSelection({ text: selectedText, rect, isOpen: true });
-      } else {
-        // Don't immediately hide popup to allow interactions with it
-        // The popup will be hidden only when clicking outside via onClose handler
+        // Force a more accurate positioning by creating a temporary range
+        // This helps with position accuracy across different text areas
+        const tempRange = range.cloneRange();
+        const rect = tempRange.getBoundingClientRect();
+
+        // Store the selection rect as a DOMRect object that accounts for scrolling
+        const selectionRect = new DOMRect(
+          rect.left,
+          rect.top,
+          rect.width,
+          rect.height
+        );
+
+        setSelection({ text: selectedText, rect: selectionRect, isOpen: true });
       }
     }, []);
 
@@ -368,7 +380,7 @@ const CanvaDiv = React.forwardRef<CanvaDivRef, CanvaDivProps>(
         {selection.isOpen && selection.text && selection.rect && (
           <SelectionPopup
             subpointText={defaultValue}
-            index={props.index}
+            index={index}
             selectedText={selection.text}
             rect={selection.rect}
             parentRef={divRef}

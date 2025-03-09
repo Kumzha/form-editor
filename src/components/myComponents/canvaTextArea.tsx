@@ -58,6 +58,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
       divElementRef.current.contains(windowSelection.anchorNode)
     ) {
       const selected = windowSelection.toString();
+      // Update the selected subpoint in redux when text is selected
       dispatch(setSelectedSubpoint(index));
       if (selected) {
         setSelectedText(selected);
@@ -155,6 +156,7 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
     };
   }, [handleSelectionChange]);
 
+  // Make sure the correct index is passed to CanvaDiv
   return (
     <div ref={divElementRef} className="relative">
       <CanvaDiv
