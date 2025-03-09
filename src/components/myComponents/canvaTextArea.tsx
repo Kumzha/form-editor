@@ -1,15 +1,15 @@
 "use client";
 
-// #################################################################
+// ##################################################################
 
-// OldShool component
+// #NEW AND WORKING
 
-// #################################################################
+// ##################################################################
 
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
-import { Textarea } from "../ui/textarea";
+import type React from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
@@ -17,6 +17,7 @@ import {
   updateSelectedSubpoint,
   setSelectedSubpoint,
 } from "@/store/forms/formSlice";
+import { CanvaDiv, type CanvaDivRef } from "./canvaDiv";
 
 interface CanvaTextAreaProps {
   index: number;
@@ -34,7 +35,8 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   );
   const { save } = useSaveSubpoint();
   const dispatch = useDispatch();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const divRef = useRef<CanvaDivRef>(null);
+  const divElementRef = useRef<HTMLDivElement>(null);
 
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
     null
@@ -45,20 +47,25 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   const currentContent =
     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
-  const handleTextSelection = (
-    event: React.SyntheticEvent<HTMLTextAreaElement>
-  ) => {
-    const textarea = event.target as HTMLTextAreaElement;
-    const selected = textarea.value.substring(
-      textarea.selectionStart,
-      textarea.selectionEnd
-    );
-    dispatch(setSelectedSubpoint(index));
-    if (selected) {
-      setSelectedText(selected);
-    }
-  };
+  // Handle text selection from the CanvaDiv component
+  const handleSelectionChange = useCallback(() => {
+    const windowSelection = window.getSelection();
 
+    if (
+      windowSelection &&
+      windowSelection.toString().trim() !== "" &&
+      divElementRef.current &&
+      divElementRef.current.contains(windowSelection.anchorNode)
+    ) {
+      const selected = windowSelection.toString();
+      dispatch(setSelectedSubpoint(index));
+      if (selected) {
+        setSelectedText(selected);
+      }
+    }
+  }, [dispatch, index]);
+
+  // Update content in Redux and save with debounce
   const handleUpdateSubpoint = useCallback(
     (value: string) => {
       // Update this specific subpoint
@@ -91,41 +98,204 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
     [debounceTimer, dispatch, index, save, selectedForm, selectedPoint]
   );
 
-  const adjustTextareaHeight = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      textareaRef.current.style.overflowY = "hidden";
+  // Adjust the height of the div based on content
+  const adjustDivHeight = useCallback(() => {
+    if (divElementRef.current) {
+      // Reset height to auto to get the correct scrollHeight
+      divElementRef.current.style.height = "auto";
+      // Set the height to the scrollHeight
+      divElementRef.current.style.height = `${divElementRef.current.scrollHeight}px`;
+      divElementRef.current.style.overflowY = "hidden";
     }
-  };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [currentContent]);
-
-  useEffect(() => {
-    const handleResize = () => adjustTextareaHeight();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Update content when it changes in Redux
+  useEffect(() => {
+    if (divRef.current && divRef.current.getValue() !== currentContent) {
+      divRef.current.setValue(currentContent);
+      adjustDivHeight();
+    }
+  }, [currentContent, adjustDivHeight]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => adjustDivHeight();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [adjustDivHeight]);
+
+  // Set up a mutation observer to detect content changes
+  useEffect(() => {
+    if (!divElementRef.current) return;
+
+    const observer = new MutationObserver(() => {
+      if (divRef.current) {
+        const newContent = divRef.current.getValue();
+        if (newContent !== currentContent) {
+          handleUpdateSubpoint(newContent);
+          adjustDivHeight();
+        }
+      }
+    });
+
+    observer.observe(divElementRef.current, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, [adjustDivHeight, currentContent, handleUpdateSubpoint]);
+
+  // Set up selection change listener
+  useEffect(() => {
+    document.addEventListener("selectionchange", handleSelectionChange);
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
+  }, [handleSelectionChange]);
+
   return (
-    <Textarea
-      ref={textareaRef}
-      className="resize-none bg-[#FCFAF4]"
-      style={{ minHeight: "2.5rem" }}
-      variant="default"
-      value={currentContent}
-      onSelect={handleTextSelection}
-      onChange={(e) => {
-        handleUpdateSubpoint(e.target.value);
-        adjustTextareaHeight();
-      }}
-    />
+    <div ref={divElementRef} className="relative">
+      <CanvaDiv
+        ref={divRef}
+        defaultValue={currentContent}
+        variant="default"
+        className="resize-none bg-[#FCFAF4] min-h-[2.5rem]"
+        index={index}
+      />
+    </div>
   );
 };
 
 export default CanvaTextArea;
+
+// #################################################################
+
+// OldShool component
+
+// #################################################################
+
+// "use client";
+
+// import React, { useState, useRef, useEffect, useCallback } from "react";
+// import { Textarea } from "../ui/textarea";
+// import { useDispatch, useSelector } from "react-redux";
+// import type { RootState } from "@/store/store";
+// import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
+// import {
+//   updateSelectedSubpoint,
+//   setSelectedSubpoint,
+// } from "@/store/forms/formSlice";
+
+// interface CanvaTextAreaProps {
+//   index: number;
+// }
+
+// // eslint-disable-next-line @typescript-eslint/no-explicit-any
+// function isFormIdObject(value: any): value is { $oid: string } {
+//   return value && typeof value === "object" && "$oid" in value;
+// }
+
+// const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
+//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+//     (state: RootState) => state.userForms
+//   );
+//   const { save } = useSaveSubpoint();
+//   const dispatch = useDispatch();
+//   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+//   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
+//     null
+//   );
+//   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//   const [selectedText, setSelectedText] = useState<string>("");
+
+//   const currentContent =
+//     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
+
+//   const handleTextSelection = (
+//     event: React.SyntheticEvent<HTMLTextAreaElement>
+//   ) => {
+//     const textarea = event.target as HTMLTextAreaElement;
+//     const selected = textarea.value.substring(
+//       textarea.selectionStart,
+//       textarea.selectionEnd
+//     );
+//     dispatch(setSelectedSubpoint(index));
+//     if (selected) {
+//       setSelectedText(selected);
+//     }
+//   };
+
+//   const handleUpdateSubpoint = useCallback(
+//     (value: string) => {
+//       // Update this specific subpoint
+//       dispatch(
+//         updateSelectedSubpoint({
+//           point: selectedPoint,
+//           subpoint: index,
+//           content: value,
+//         })
+//       );
+
+//       if (debounceTimer) {
+//         clearTimeout(debounceTimer);
+//       }
+
+//       const timer = setTimeout(() => {
+//         save(
+//           value,
+//           index,
+//           selectedPoint,
+//           isFormIdObject(selectedForm?.form_id)
+//             ? selectedForm.form_id.$oid
+//             : selectedForm?.form_id || "",
+//           selectedForm?.name || ""
+//         );
+//       }, 5000);
+
+//       setDebounceTimer(timer);
+//     },
+//     [debounceTimer, dispatch, index, save, selectedForm, selectedPoint]
+//   );
+
+//   const adjustTextareaHeight = () => {
+//     if (textareaRef.current) {
+//       textareaRef.current.style.height = "auto";
+//       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+//       textareaRef.current.style.overflowY = "hidden";
+//     }
+//   };
+
+//   useEffect(() => {
+//     adjustTextareaHeight();
+//   }, [currentContent]);
+
+//   useEffect(() => {
+//     const handleResize = () => adjustTextareaHeight();
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
+
+//   return (
+//     <Textarea
+//       ref={textareaRef}
+//       className="resize-none bg-[#FCFAF4]"
+//       style={{ minHeight: "2.5rem" }}
+//       variant="default"
+//       value={currentContent}
+//       onSelect={handleTextSelection}
+//       onChange={(e) => {
+//         handleUpdateSubpoint(e.target.value);
+//         adjustTextareaHeight();
+//       }}
+//     />
+//   );
+// };
+
+// export default CanvaTextArea;
 
 // #################################################################
 

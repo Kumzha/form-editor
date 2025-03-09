@@ -1,20 +1,24 @@
-import React, { useRef } from "react";
+"use client";
+
+import type React from "react";
+import { useRef, useState } from "react";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/constants/constants";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 import { useMutation } from "@tanstack/react-query";
-import { RootState } from "@/store/store";
+import type { RootState } from "@/store/store";
 import { FaMagic } from "react-icons/fa";
 import { toast } from "sonner";
+import { Input } from "../ui/input";
 
 interface ModifyProps {
-  userPrompt: string;
+  selectedText: string;
   subpointText: string;
   query: string;
   formName: string;
   subpointIndex: number;
-  funcAfterSuccess: () => void;
+  index: number;
 }
 
 type UpdateFieldRequest = {
@@ -36,7 +40,6 @@ function isFormIdObject(value: any): value is { $oid: string } {
 // Track active modify operations
 const activeModifyOperations = new Set<string>();
 
-// Note: Removed useSelector from this function.
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
   const token = localStorage.getItem("authToken");
 
@@ -58,18 +61,23 @@ const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
 };
 
 const ModifyButton: React.FC<ModifyProps> = ({
-  userPrompt,
   subpointText,
   query,
   formName,
   subpointIndex,
-  funcAfterSuccess,
 }) => {
   const dispatch = useDispatch();
 
   const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [userPrompt, setUserPrompt] = useState<string>("");
+
+  const handlePromptChange = (value: string) => {
+    setUserPrompt(value);
+  };
 
   const { save } = useSaveSubpoint();
 
@@ -109,7 +117,6 @@ const ModifyButton: React.FC<ModifyProps> = ({
           : selectedForm?.form_id || "",
         selectedForm?.name || ""
       );
-      funcAfterSuccess();
     },
     onError: (error) => {
       console.error("Error updating form:", error.message);
@@ -139,9 +146,56 @@ const ModifyButton: React.FC<ModifyProps> = ({
     modifyMutation.mutate(data);
   };
 
+  const isPending = modifyMutation.isPending || isModifyActive;
+
   return (
-    <div className="relative inline-block text-left bg-[#524CE7] rounded-xl text-[#FCFAF4] p-2 transform transition duration-150 ease-in-out hover:scale-105 active:scale-95 cursor-pointer">
-      <FaMagic onClick={handleSubmit} />
+    <div className="flex flex-row w-full h-8 items-center">
+      {" "}
+      <Input
+        onChange={(e) => handlePromptChange(e.target.value)}
+        placeholder="Enter your prompt"
+        className="bg-[#FCFAF4] mx-1 w-full rounded-2xl border-none"
+        value={userPrompt}
+        disabled={isPending || !subpointText}
+      />
+      <div
+        className={`
+        relative inline-block text-left bg-[#524CE7] rounded-xl text-[#FCFAF4] p-2 
+        transform transition duration-150 ease-in-out 
+        ${
+          isPending
+            ? "cursor-wait"
+            : "hover:scale-105 active:scale-95 cursor-pointer"
+        }
+        ${
+          isPending
+            ? "shadow-inner shadow-[#3a36a3]"
+            : "shadow-sm hover:shadow-md"
+        }
+      `}
+        onClick={isPending ? undefined : handleSubmit}
+        aria-disabled={isPending}
+      >
+        <div className="relative">
+          {isPending ? (
+            <div className="flex items-center justify-center">
+              <FaMagic className="animate-pulse opacity-70" />
+              <span className="absolute inset-0 flex items-center justify-center">
+                <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-[#FCFAF4] animate-spin"></span>
+              </span>
+            </div>
+          ) : (
+            <FaMagic />
+          )}
+        </div>
+
+        {/* Ripple effect when active */}
+        {isPending && (
+          <span className="absolute inset-0 rounded-xl overflow-hidden">
+            <span className="absolute inset-0 rounded-xl bg-white/20 animate-ping opacity-30"></span>
+          </span>
+        )}
+      </div>
     </div>
   );
 };

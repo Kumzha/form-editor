@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { BASE_URL } from "@/constants/constants";
 
 // Define the ticket priority enum to match backend
 enum TicketPriority {
@@ -61,10 +62,11 @@ const FeedbackButton: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
   // Create ticket mutation
   const { mutate: createTicket, isPending } = useMutation({
     mutationFn: async (data: TicketData) => {
-      const response = await fetch("/api/support/create-ticket", {
+      const response = await fetch(`${BASE_URL}/support/create-ticket`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
         body: JSON.stringify(data),
       });
