@@ -13,7 +13,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ form }) => {
   return (
-    <div className="h-16 bg-[#6a6a6d] fixed top-0 left-0 right-0 z-50 border-b-2 border-[#000000] flex flex-row">
+    <div className="h-16 bg-[#6a6a6d] fixed top-0 left-0 right-0 z-[9999] border-b-2 border-[#000000] flex flex-row">
       <div className="w-[15%]">
         <div className="h-16 p-3 flex items-center justify-center">
           <div className="w-5 h-5 bg-white rounded-full"></div>

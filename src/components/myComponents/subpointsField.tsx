@@ -1,17 +1,20 @@
 "use client";
-import React from "react";
+import React, { useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { setSelectedSubpoint } from "@/store/forms/formSlice";
 import InspireButton from "./inspireButton";
-import CanvaTextArea from "./canvaTextArea";
+import { CanvaDiv, type CanvaDivRef } from "./canvaDiv";
 
 const activeInspires = new Set<string>();
 
 const SubpointsField = () => {
   const dispatch = useDispatch();
+  const canvaDivRefs = useRef<Map<number, React.RefObject<CanvaDivRef>>>(
+    new Map()
+  );
 
   const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
     (state: RootState) => state.userForms
@@ -20,6 +23,14 @@ const SubpointsField = () => {
     selectedForm?.form_type?.questions?.[selectedPoint]?.subpoints;
 
   if (!formSubpointQuestions) return <></>;
+
+  // Get or create a ref for a specific index
+  const getCanvaDivRef = (index: number) => {
+    if (!canvaDivRefs.current.has(index)) {
+      canvaDivRefs.current.set(index, React.createRef<CanvaDivRef>());
+    }
+    return canvaDivRefs.current.get(index)!;
+  };
 
   return (
     <div className="bg-[#CACACA] w-full flex flex-col gap-4 rounded pb-10">
@@ -44,9 +55,12 @@ const SubpointsField = () => {
                     {subpoint.sub_title}
                   </Label>
                   <Separator />
-                  <CanvaTextArea
-                    key={`textarea-${selectedPoint}-${index}`}
+                  <CanvaDiv
+                    ref={getCanvaDivRef(index)}
+                    key={`canvadiv-${selectedPoint}-${index}`}
                     index={index}
+                    defaultValue={subpointContent}
+                    className="bg-[#FCFAF4] min-h-[2.5rem]"
                   />
                   <div className="absolute -bottom-5 right-0 p-1 text-xs text-gray-500">
                     {subpointContent.length}

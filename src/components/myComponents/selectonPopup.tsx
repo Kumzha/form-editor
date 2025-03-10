@@ -57,23 +57,45 @@ export function SelectionPopup({
       // Get parent container's position
       const parentRect = parentRef.current.getBoundingClientRect();
 
-      // Calculate the position relative to the parent component
-      // Position above the selection, relative to parent
-      const relativeTop = rect.top - parentRect.top - popupRect.height - 10;
+      // Determine if selection is near the top or bottom of the parent
+      const isNearTop = rect.top - parentRect.top < popupRect.height + 20;
+
+      // Position logic that adjusts based on selection position
+      let relativeTop;
+
+      if (isNearTop) {
+        // If selection is near the top, position popup below the selection
+        relativeTop = rect.bottom - parentRect.top + 10;
+      } else {
+        // Otherwise position above (default)
+        relativeTop = rect.top - parentRect.top - popupRect.height - 10;
+      }
 
       // Center horizontally on the selection, relative to parent
       const relativeLeft =
         rect.left - parentRect.left + rect.width / 2 - popupRect.width / 2;
 
-      // Ensure popup stays within parent bounds
-      const safeTop = Math.max(
+      // Allow popup to extend outside parent if needed, but keep it within viewport
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      // Calculate absolute position in viewport
+      const absoluteTop = parentRect.top + relativeTop;
+      const absoluteLeft = parentRect.left + relativeLeft;
+
+      // Ensure popup stays within viewport boundaries
+      const safeAbsoluteTop = Math.max(
         10,
-        Math.min(relativeTop, parentRect.height - popupRect.height - 10)
+        Math.min(absoluteTop, viewportHeight - popupRect.height - 10)
       );
-      const safeLeft = Math.max(
+      const safeAbsoluteLeft = Math.max(
         10,
-        Math.min(relativeLeft, parentRect.width - popupRect.width - 10)
+        Math.min(absoluteLeft, viewportWidth - popupRect.width - 10)
       );
+
+      // Convert back to position relative to parent
+      const safeTop = safeAbsoluteTop - parentRect.top;
+      const safeLeft = safeAbsoluteLeft - parentRect.left;
 
       // Position the popup by setting absolute positioning relative to parent
       setPosition({ top: safeTop, left: safeLeft });
@@ -115,6 +137,8 @@ export function SelectionPopup({
 
   // Prevent clicks inside the popup from bubbling up to the document
   const handlePopupClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+
     e.stopPropagation();
   };
 
@@ -122,15 +146,16 @@ export function SelectionPopup({
   const popupElement = (
     <div
       ref={popupRef}
-      className="absolute z-[9999] bg-white shadow-lg rounded-md p-2 border border-gray-200 w-2/6"
+      className="absolute z-[9998] bg-white shadow-lg rounded-md p-2 border border-gray-200 w-2/6"
       style={{
         visibility: position ? "visible" : "hidden",
         top: position?.top ?? 0,
         left: position?.left ?? 0,
         opacity: position ? 1 : 0,
         transition: "opacity 0.15s ease-in-out",
+        pointerEvents: "auto", // Ensure popup can receive interactions
       }}
-      onClick={handlePopupClick}
+      onMouseDown={handlePopupClick}
     >
       <AnimatePresence>
         <motion.div

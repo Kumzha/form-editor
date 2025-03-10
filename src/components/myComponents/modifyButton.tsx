@@ -156,7 +156,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
         placeholder="Enter your prompt"
         className="bg-[#FCFAF4] mx-1 w-full rounded-2xl border-none"
         value={userPrompt}
-        disabled={isPending || !subpointText}
+        disabled={isPending}
       />
       <div
         className={`

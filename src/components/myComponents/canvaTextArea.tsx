@@ -1,13 +1,5 @@
 "use client";
 
-// ##################################################################
-
-// #NEW AND WORKING
-
-// ##################################################################
-
-"use client";
-
 import type React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,45 +21,31 @@ function isFormIdObject(value: any): value is { $oid: string } {
 }
 
 const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+  const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
   );
   const { save } = useSaveSubpoint();
   const dispatch = useDispatch();
   const divRef = useRef<CanvaDivRef>(null);
-  const divElementRef = useRef<HTMLDivElement>(null);
-
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(
     null
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selectedText, setSelectedText] = useState<string>("");
 
   const currentContent =
     selectedForm?.points?.[selectedPoint]?.subpoints?.[index]?.content || "";
 
-  // Handle text selection from the CanvaDiv component
-  const handleSelectionChange = useCallback(() => {
-    const windowSelection = window.getSelection();
-
-    if (
-      windowSelection &&
-      windowSelection.toString().trim() !== "" &&
-      divElementRef.current &&
-      divElementRef.current.contains(windowSelection.anchorNode)
-    ) {
-      const selected = windowSelection.toString();
-      // Update the selected subpoint in redux when text is selected
-      dispatch(setSelectedSubpoint(index));
-      if (selected) {
-        setSelectedText(selected);
+  // Handle text selection from CanvaDiv
+  const handleSelection = useCallback(
+    (selectedText: string) => {
+      if (selectedText) {
+        dispatch(setSelectedSubpoint(index));
       }
-    }
-  }, [dispatch, index]);
+    },
+    [dispatch, index]
+  );
 
   // Update content in Redux and save with debounce
-  const handleUpdateSubpoint = useCallback(
+  const handleContentChange = useCallback(
     (value: string) => {
       // Update this specific subpoint
       dispatch(
@@ -99,72 +77,27 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
     [debounceTimer, dispatch, index, save, selectedForm, selectedPoint]
   );
 
-  // Adjust the height of the div based on content
-  const adjustDivHeight = useCallback(() => {
-    if (divElementRef.current) {
-      // Reset height to auto to get the correct scrollHeight
-      divElementRef.current.style.height = "auto";
-      // Set the height to the scrollHeight
-      divElementRef.current.style.height = `${divElementRef.current.scrollHeight}px`;
-      divElementRef.current.style.overflowY = "hidden";
-    }
-  }, []);
-
   // Update content when it changes in Redux
   useEffect(() => {
     if (divRef.current && divRef.current.getValue() !== currentContent) {
       divRef.current.setValue(currentContent);
-      adjustDivHeight();
     }
-  }, [currentContent, adjustDivHeight]);
+  }, [currentContent]);
 
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => adjustDivHeight();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [adjustDivHeight]);
+  // This is now handled directly in the CanvaDiv component
+  // No need for a separate highlight handler in CanvaTextArea
+  // The selection will be highlighted with red background on mouseUp
 
-  // Set up a mutation observer to detect content changes
-  useEffect(() => {
-    if (!divElementRef.current) return;
-
-    const observer = new MutationObserver(() => {
-      if (divRef.current) {
-        const newContent = divRef.current.getValue();
-        if (newContent !== currentContent) {
-          handleUpdateSubpoint(newContent);
-          adjustDivHeight();
-        }
-      }
-    });
-
-    observer.observe(divElementRef.current, {
-      childList: true,
-      characterData: true,
-      subtree: true,
-    });
-
-    return () => observer.disconnect();
-  }, [adjustDivHeight, currentContent, handleUpdateSubpoint]);
-
-  // Set up selection change listener
-  useEffect(() => {
-    document.addEventListener("selectionchange", handleSelectionChange);
-    return () => {
-      document.removeEventListener("selectionchange", handleSelectionChange);
-    };
-  }, [handleSelectionChange]);
-
-  // Make sure the correct index is passed to CanvaDiv
   return (
-    <div ref={divElementRef} className="relative">
+    <div className="relative">
       <CanvaDiv
         ref={divRef}
         defaultValue={currentContent}
         variant="default"
         className="resize-none bg-[#FCFAF4] min-h-[2.5rem]"
         index={index}
+        onContentChange={handleContentChange}
+        onSelection={handleSelection}
       />
     </div>
   );
