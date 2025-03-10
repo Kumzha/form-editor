@@ -1,4 +1,3 @@
-// In selectonPopup.tsx
 import * as React from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -57,9 +56,19 @@ export function SelectionPopup({
       // Get parent container's position
       const parentRect = parentRef.current.getBoundingClientRect();
 
-      // Calculate the position relative to the parent component
-      // Position above the selection, relative to parent
-      const relativeTop = rect.top - parentRect.top - popupRect.height - 10;
+      // Define minimum space needed above for positioning
+      const MIN_SPACE_ABOVE = popupRect.height + 10; // popup height + margin
+      const hasEnoughSpaceAbove = rect.top - parentRect.top >= MIN_SPACE_ABOVE;
+
+      let relativeTop;
+
+      if (hasEnoughSpaceAbove) {
+        // Position above the selection if there's enough space
+        relativeTop = rect.top - parentRect.top - popupRect.height - 10;
+      } else {
+        // Position below the selection if there's not enough space above
+        relativeTop = rect.top - parentRect.top + rect.height + 10;
+      }
 
       // Center horizontally on the selection, relative to parent
       const relativeLeft =
