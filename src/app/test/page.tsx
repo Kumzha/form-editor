@@ -1,114 +1,159 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { CanvaDiv, type CanvaDivRef } from "@/components/myComponents/canvaDiv";
+import { useState, useRef, useEffect } from "react";
 
-export default function Home() {
-  // Sample data array to map over
-  const [items, setItems] = useState([
-    {
-      id: "item-1",
-      content:
-        "This is the first editable div. Try selecting some text to see the popup!",
-      variant: "default" as const,
-    },
-    {
-      id: "item-2",
-      content:
-        "This is the second editable div with newForm styling. Try selecting some text!",
-      variant: "newForm" as const,
-    },
-    {
-      id: "item-3",
-      content:
-        "This is the third editable div with secondary styling. Select some text here too!",
-      variant: "secondary" as const,
-    },
-    {
-      id: "item-4",
-      content:
-        "This is a fourth editable div. You can add as many as you need!",
-      variant: "default" as const,
-    },
-  ]);
+interface HighlightRange {
+  start: number;
+  end: number;
+  id: string;
+}
 
-  // Create a ref object to store multiple refs
-  const divsRef = useRef<Map<string, CanvaDivRef>>(new Map());
+export default function TextHighlighter() {
+  const [text, setText] = useState(
+    "This is a sample text that you can highlight. Try selecting a part of this text to see it get highlighted with a red background."
+  );
+  const [highlightedText, setHighlightedText] = useState<string>("");
+  const contentEditableRef = useRef<HTMLDivElement>(null);
+  const isHighlightingRef = useRef<boolean>(false);
 
-  // Function to set a ref for a specific item
-  const setDivRef = (id: string, ref: CanvaDivRef | null) => {
-    if (ref) {
-      divsRef.current.set(id, ref);
-    } else {
-      divsRef.current.delete(id);
+  useEffect(() => {
+    // Initialize the contentEditable with the text
+    if (contentEditableRef.current) {
+      contentEditableRef.current.textContent = text;
     }
-  };
+  }, [text]);
 
-  // Log values from all divs
-  const logAllValues = () => {
-    divsRef.current.forEach((ref, id) => {
-      console.log(`Item ${id} value:`, ref.getValue());
-    });
-  };
+  const handleSelection = () => {
+    if (isHighlightingRef.current) return;
 
-  // Reset all divs to their original content
-  const resetAllValues = () => {
-    items.forEach((item) => {
-      const ref = divsRef.current.get(item.id);
-      if (ref) {
-        ref.setValue(item.content);
-      }
-    });
-  };
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !contentEditableRef.current) {
+      return;
+    }
 
-  // Add a new item
-  const addItem = () => {
-    const newItem = {
-      id: `item-${items.length + 1}`,
-      content: `This is a new editable div #${items.length + 1}. Try it out!`,
-      variant: "default" as const,
+    const selectedText = selection.toString().trim();
+    if (!selectedText) return;
+
+    // Get the current text content (without any existing highlights)
+    const currentText = contentEditableRef.current.textContent || "";
+
+    // Find the position of the selected text in the content
+    const range = selection.getRangeAt(0);
+
+    // Create a temporary range to calculate the start position
+    const tempRange = document.createRange();
+    tempRange.setStart(contentEditableRef.current, 0);
+    tempRange.setEnd(range.startContainer, range.startOffset);
+    const startOffset = tempRange.toString().length;
+
+    // Calculate the end position
+    const endOffset = startOffset + selectedText.length;
+
+    // Create a new highlight
+    const newHighlight: HighlightRange = {
+      start: startOffset,
+      end: endOffset,
+      id: `highlight-${Date.now()}`,
     };
-    setItems([...items, newItem]);
+
+    // Update highlight state
+    setHighlightedText(selectedText);
+
+    // Apply the highlight without modifying the DOM structure
+    applyHighlight(newHighlight, currentText);
+
+    // Prevent default browser text selection behavior
+    selection.removeAllRanges();
+  };
+
+  const applyHighlight = (
+    highlightRange: HighlightRange | null,
+    currentText: string
+  ) => {
+    if (!contentEditableRef.current) return;
+    isHighlightingRef.current = true;
+
+    if (highlightRange) {
+      // Make sure we're working with the accurate text content
+      const textContent =
+        currentText || contentEditableRef.current.textContent || "";
+
+      // Split the text into three parts: before, highlighted, and after
+      const beforeText = textContent.substring(0, highlightRange.start);
+      const highlightedText = textContent.substring(
+        highlightRange.start,
+        highlightRange.end
+      );
+      const afterText = textContent.substring(highlightRange.end);
+
+      // Create the HTML with the highlight span, being careful not to add extra spaces
+      contentEditableRef.current.innerHTML =
+        beforeText +
+        `<span class="bg-red-500 text-white">${highlightedText}</span>` +
+        afterText;
+    } else {
+      // If no highlight, just set the plain text
+      contentEditableRef.current.textContent = currentText;
+    }
+
+    isHighlightingRef.current = false;
+  };
+
+  const handleInput = () => {
+    if (!contentEditableRef.current || isHighlightingRef.current) return;
+
+    // When typing, update the text state and clear any highlight
+    const newText = contentEditableRef.current.textContent || "";
+    setText(newText);
+    // setHighlightedText("");
+  };
+
+  const removeHighlight = () => {
+    if (!contentEditableRef.current) return;
+
+    // Get the current text without formatting
+    const plainText = contentEditableRef.current.textContent || "";
+
+    // Clear the highlight state
+    setHighlightedText("");
+
+    // Set the content to plain text
+    contentEditableRef.current.textContent = plainText;
+  };
+
+  // Handle pasting to strip formatting
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData("text/plain");
+    document.execCommand("insertText", false, text);
   };
 
   return (
-    <main className="container mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Mapped Editable Divs</h1>
-
-      <div className="space-y-6">
-        {items.map((item, key) => (
-          <div key={key} className="space-y-2">
-            <h2 className="text-xl">Item {item.id}</h2>
-            <CanvaDiv
-              index={key}
-              ref={(ref) => setDivRef(item.id, ref)}
-              variant={item.variant}
-              defaultValue={item.content}
-            />
-          </div>
-        ))}
-      </div>
-
-      <div className="flex gap-4">
+    <div className="p-6 max-w-2xl mx-auto mt-10">
+      <div
+        ref={contentEditableRef}
+        className="p-4 border rounded-md shadow-sm bg-white min-h-32"
+        contentEditable
+        onMouseUp={handleSelection}
+        onInput={handleInput}
+        onBlur={handleInput}
+        onPaste={handlePaste}
+        suppressContentEditableWarning
+      ></div>
+      <div className="mt-4 flex gap-2">
         <button
-          onClick={logAllValues}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+          onClick={removeHighlight}
         >
-          Log All Values
+          Clear Highlight
         </button>
         <button
-          onClick={resetAllValues}
-          className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          className="px-3 py-1 bg-gray-200 rounded"
+          onClick={() => console.log(highlightedText)}
         >
-          Reset All Values
-        </button>
-        <button
-          onClick={addItem}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Add New Item
+          Check Highlight
         </button>
       </div>
-    </main>
+    </div>
   );
 }
