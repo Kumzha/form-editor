@@ -4,30 +4,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import ModifyButton from "./modifyButton";
+import { useRef, useState, useEffect, FC, RefObject } from "react";
 
 interface SelectionPopupProps {
-  index: number;
   selectedText: string;
-  subpointText: string;
   rect: DOMRect;
-  parentRef: React.RefObject<HTMLElement>;
+  parentRef: RefObject<HTMLDivElement>;
   onClose: () => void;
+  index: number;
+  subpointText: string;
+  reselectText?: () => boolean;
+  onApply?: () => void;
 }
 
-export function SelectionPopup({
+export const SelectionPopup: FC<SelectionPopupProps> = ({
   selectedText,
   rect,
   parentRef,
+  onClose,
   index,
   subpointText,
-  onClose,
-}: SelectionPopupProps) {
-  const popupRef = React.useRef<HTMLDivElement>(null);
-  const [position, setPosition] = React.useState<{
+  onApply,
+}) => {
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{
     top: number;
     left: number;
   } | null>(null);
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
@@ -40,13 +44,13 @@ export function SelectionPopup({
   const formName = selectedForm?.name || "";
 
   // Mount state for client-side rendering
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
   // Calculate position for the popup relative to its parent container
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mounted || !popupRef.current || !parentRef.current) return;
 
     const calculatePosition = () => {
@@ -90,7 +94,9 @@ export function SelectionPopup({
 
     // Create a ResizeObserver to handle popup size changes
     const resizeObserver = new ResizeObserver(calculatePosition);
-    resizeObserver.observe(popupRef.current);
+    if (popupRef.current) {
+      resizeObserver.observe(popupRef.current);
+    }
 
     // Initial calculation
     calculatePosition();
@@ -102,7 +108,7 @@ export function SelectionPopup({
   }, [rect, parentRef, mounted]);
 
   // Handle click outside
-  React.useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         popupRef.current &&
@@ -122,9 +128,12 @@ export function SelectionPopup({
     };
   }, [onClose, mounted]);
 
-  // Prevent clicks inside the popup from bubbling up to the document
-  const handlePopupClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Function to handle the apply button click
+  const handleApply = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    if (onApply) {
+      onApply();
+    }
   };
 
   // The actual popup component
@@ -139,7 +148,6 @@ export function SelectionPopup({
         opacity: position ? 1 : 0,
         transition: "opacity 0.15s ease-in-out",
       }}
-      onClick={handlePopupClick}
     >
       <AnimatePresence>
         <motion.div
@@ -150,21 +158,22 @@ export function SelectionPopup({
           transition={{ duration: 0.3 }}
           className="flex gap-1 items-center"
         >
-          <ModifyButton
-            subpointText={subpointText}
-            selectedText={selectedText}
-            query={prompt}
-            subpointIndex={index}
-            formName={formName}
-            index={index}
-          />
+          <div onClick={handleApply}>
+            <ModifyButton
+              subpointText={subpointText}
+              selectedText={selectedText}
+              query={prompt}
+              subpointIndex={index}
+              formName={formName}
+              index={index}
+            />
+          </div>
         </motion.div>
       </AnimatePresence>
     </div>
   );
 
-  // Render relative to parent instead of document.body, with null check
   return mounted && parentRef.current
     ? createPortal(popupElement, parentRef.current)
     : null;
-}
+};
