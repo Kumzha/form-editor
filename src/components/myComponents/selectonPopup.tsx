@@ -15,6 +15,7 @@ interface SelectionPopupProps {
   subpointText: string;
   reselectText?: () => boolean;
   onApply?: () => void;
+  onInputFocus?: (focused: boolean) => void;
 }
 
 export const SelectionPopup: FC<SelectionPopupProps> = ({
@@ -25,6 +26,7 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
   index,
   subpointText,
   onApply,
+  onInputFocus,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{
@@ -107,14 +109,28 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
     };
   }, [rect, parentRef, mounted]);
 
-  // Handle click outside
+  // useEffect(() => {
+  //   if (onApply) {
+  //     onApply();
+  //   }
+  // }, []);
+  // Handle click outside - modified to not close when clicking inside the popup
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         popupRef.current &&
         !popupRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        // Check if the click is on an input element inside the popup
+        const target = event.target as HTMLElement;
+        const isInputInsidePopup =
+          popupRef.current.contains(target) &&
+          (target.tagName === "INPUT" || target.closest("input"));
+
+        // Only close if not clicking on an input element
+        if (!isInputInsidePopup) {
+          onClose();
+        }
       }
     };
 
@@ -136,6 +152,11 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
     }
   };
 
+  // Stop propagation for input interactions to prevent popup from closing
+  // const handleInputInteraction = (e: React.SyntheticEvent) => {
+  //   e.stopPropagation();
+  // };
+
   // The actual popup component
   const popupElement = (
     <div
@@ -148,6 +169,7 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
         opacity: position ? 1 : 0,
         transition: "opacity 0.15s ease-in-out",
       }}
+      onClick={(e) => e.stopPropagation()} // Stop click propagation at the container level
     >
       <AnimatePresence>
         <motion.div
@@ -157,8 +179,15 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.3 }}
           className="flex gap-1 items-center"
+          onClick={(e) => e.stopPropagation()} // Stop propagation here too
         >
-          <div onClick={handleApply}>
+          <div
+            onClick={(e) => {
+              e.stopPropagation(); // Stop event propagation
+              handleApply(e);
+            }}
+            onMouseDown={(e) => e.stopPropagation()} // Prevent selection cancellation
+          >
             <ModifyButton
               subpointText={subpointText}
               selectedText={selectedText}
@@ -166,6 +195,8 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
               subpointIndex={index}
               formName={formName}
               index={index}
+              onApply={onApply}
+              onInputFocus={onInputFocus}
             />
           </div>
         </motion.div>

@@ -19,6 +19,8 @@ interface ModifyProps {
   formName: string;
   subpointIndex: number;
   index: number;
+  onInputFocus?: (focused: boolean) => void;
+  onApply?: () => void;
 }
 
 type UpdateFieldRequest = {
@@ -65,6 +67,8 @@ const ModifyButton: React.FC<ModifyProps> = ({
   query,
   formName,
   subpointIndex,
+  onInputFocus,
+  onApply,
 }) => {
   const dispatch = useDispatch();
 
@@ -72,11 +76,12 @@ const ModifyButton: React.FC<ModifyProps> = ({
     (state: RootState) => state.userForms
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userPrompt, setUserPrompt] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handlePromptChange = (value: string) => {
-    setUserPrompt(value);
+  const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation(); // Stop event propagation
+    setUserPrompt(e.target.value);
   };
 
   const { save } = useSaveSubpoint();
@@ -128,7 +133,9 @@ const ModifyButton: React.FC<ModifyProps> = ({
     },
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+
     if (!userPrompt || !query || !formName || !subpointText) {
       toast.error("Please fill in all fields.");
       return;
@@ -146,17 +153,62 @@ const ModifyButton: React.FC<ModifyProps> = ({
     modifyMutation.mutate(data);
   };
 
+  // Handle input focus events
+  // const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  //   e.stopPropagation();
+  //   console.log("Input focus");
+  //   if (onInputFocus) onInputFocus(true);
+  // };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    console.log("BLUR");
+    e.stopPropagation();
+    if (onInputFocus) onInputFocus(false);
+  };
+
+  // Focus the input automatically when it mounts
+  // useEffect(() => {
+  //   if (inputRef.current) {
+  //     // Small delay to ensure the popup is fully rendered
+  //     setTimeout(() => {
+  //       if (inputRef.current) {
+  //         inputRef.current.focus();
+  //       }
+  //     }, 100);
+  //   }
+  // }, []);
+
   const isPending = modifyMutation.isPending || isModifyActive;
 
   return (
-    <div className="flex flex-row w-full h-8 items-center">
-      {" "}
+    <div
+      className="flex flex-row w-full h-8 items-center"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <Input
-        onChange={(e) => handlePromptChange(e.target.value)}
+        ref={inputRef}
+        onChange={handlePromptChange}
         placeholder="Enter your prompt"
         className="bg-[#FCFAF4] mx-1 w-full rounded-2xl border-none"
         value={userPrompt}
         disabled={isPending || !subpointText}
+        onBlur={handleInputBlur}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          if (onApply) onApply();
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              // Force the input to be editable if needed
+              inputRef.current.readOnly = false;
+
+              // If the above doesn't work, try this trick to force focus
+              inputRef.current.blur();
+              inputRef.current.focus();
+            }
+          }, 50);
+        }}
       />
       <div
         className={`
@@ -174,6 +226,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
         }
       `}
         onClick={isPending ? undefined : handleSubmit}
+        onMouseDown={(e) => e.stopPropagation()}
         aria-disabled={isPending}
       >
         <div className="relative">

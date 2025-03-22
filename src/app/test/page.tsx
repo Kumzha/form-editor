@@ -1,6 +1,6 @@
 "use client";
 import { SelectionPopup } from "@/components/myComponents/selectonPopup";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 
 interface HighlightRange {
   start: number;
@@ -20,6 +20,7 @@ export default function TextHighlighter() {
   const containerRef = useRef<HTMLDivElement>(null); // Separate container for popup
   const isHighlightingRef = useRef<boolean>(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const isInputFocusedRef = useRef<boolean>(false);
 
   useEffect(() => {
     // Initialize the contentEditable with the text
@@ -28,24 +29,40 @@ export default function TextHighlighter() {
     }
   }, [text]);
 
-  const handleClosePopup = useCallback(() => {
-    setIsPopupOpen(false);
-  }, []);
+  const handleClosePopup = () => {
+    if (!isInputFocusedRef.current) {
+      setIsPopupOpen(false);
+    }
+  };
 
   const handleSelection = () => {
-    if (isHighlightingRef.current) return;
+    if (highlight) removeHighlight();
+
+    // Skip if we're already highlighting or an input is focused
+    if (isHighlightingRef.current || isInputFocusedRef.current) {
+      console.log("skip");
+      return;
+    }
 
     const selectionTemp = window.getSelection();
+
     if (
       !selectionTemp ||
       selectionTemp.isCollapsed ||
       !contentEditableRef.current
     ) {
+      console.log(selectionTemp);
+      console.log(selectionTemp?.isCollapsed);
+      console.log(contentEditableRef.current);
       return;
     }
 
     const selectedText = selectionTemp.toString().trim();
-    if (!selectedText) return;
+
+    if (!selectedText) {
+      console.log("no text");
+      return;
+    }
 
     // Find the position of the selected text in the content
     const range = selectionTemp.getRangeAt(0);
@@ -85,19 +102,18 @@ export default function TextHighlighter() {
   const clickPopup = () => {
     // First close the popup gracefully
     // Use a small timeout to ensure the portal is unmounted before we modify the DOM
+
     setTimeout(() => {
-      applyHighlight(highlight, selectedText);
+      applyHighlight(highlight);
       if (selection) {
         selection.removeAllRanges();
       }
     }, 10);
   };
 
-  const applyHighlight = async (
-    highlightRange: HighlightRange | null,
-    currentSelectedText: string
-  ) => {
+  const applyHighlight = async (highlightRange: HighlightRange | null) => {
     if (!contentEditableRef.current) return;
+
     isHighlightingRef.current = true;
 
     if (highlightRange) {
@@ -137,7 +153,7 @@ export default function TextHighlighter() {
 
   const removeHighlight = () => {
     if (!contentEditableRef.current) return;
-
+    console.log("removeHighlight");
     // Get the current text without formatting
     const plainText = contentEditableRef.current.textContent || "";
 
@@ -156,11 +172,9 @@ export default function TextHighlighter() {
     document.execCommand("insertText", false, text);
   };
 
-  // Show popup after a selection is highlighted
-  const showPopupAfterHighlight = () => {
-    if (highlight && !isPopupOpen) {
-      setIsPopupOpen(true);
-    }
+  // Track input focus state
+  const handleInputFocus = (focused: boolean) => {
+    isInputFocusedRef.current = focused;
   };
 
   return (
@@ -169,11 +183,12 @@ export default function TextHighlighter() {
         ref={contentEditableRef}
         className="p-4 border rounded-md shadow-sm bg-white min-h-32"
         contentEditable
-        onMouseUp={handleSelection}
+        onMouseDown={() => removeHighlight()}
+        onSelect={handleSelection}
         onInput={handleInput}
         onPaste={handlePaste}
         suppressContentEditableWarning
-      ></div>
+      />
 
       {/* Render popup outside the contentEditable but inside the container */}
       {highlight && isPopupOpen && highlight.rect && (
@@ -185,38 +200,9 @@ export default function TextHighlighter() {
           parentRef={containerRef}
           onClose={handleClosePopup}
           onApply={clickPopup}
+          onInputFocus={handleInputFocus} // Pass down the input focus handler
         />
       )}
-
-      <div className="mt-4 flex gap-2">
-        <button
-          className="px-3 py-1 bg-blue-500 text-white rounded"
-          onClick={removeHighlight}
-        >
-          Clear Highlight
-        </button>
-        <button
-          className="px-3 py-1 bg-gray-200 rounded"
-          onClick={() => {
-            console.log(highlight);
-            console.log(selectedText);
-          }}
-        >
-          Check Highlight
-        </button>
-        <button
-          className="px-3 py-1 bg-green-500 text-white rounded"
-          onClick={showPopupAfterHighlight}
-        >
-          Show Popup
-        </button>
-        <button
-          className="px-3 py-1 bg-gray-200 rounded"
-          onClick={() => console.log(text)}
-        >
-          Text
-        </button>
-      </div>
     </div>
   );
 }
