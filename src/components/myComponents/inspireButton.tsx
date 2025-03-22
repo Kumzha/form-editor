@@ -58,6 +58,8 @@ const InspireButton: React.FC = () => {
     streamDebounceTimerRef.current = setTimeout(() => {
       isUpdatingContent = true;
       try {
+        // Only update Redux state - we'll save to backend at the end
+        console.log("InspireButton updating Redux with:", value);
         dispatch(
           updateSelectedSubpoint({
             point: targetPoint.current,
@@ -69,7 +71,7 @@ const InspireButton: React.FC = () => {
         isUpdatingContent = false;
         streamDebounceTimerRef.current = null;
       }
-    }, 250); // Increased from 100ms to 250ms
+    }, 100); // Increased from 100ms to 250ms
   };
 
   const handleInspire = async () => {
@@ -137,14 +139,23 @@ const InspireButton: React.FC = () => {
 
         // Only update UI if enough time has passed since last update (throttling)
         const now = Date.now();
-        if (now - lastUpdateTime >= 500) { // Increased from 200ms to 500ms
+        if (now - lastUpdateTime >= 250) { // Reduced from 500ms to 250ms for more responsive updates
           handleUpdateSubpoint(accumulatedText);
           lastUpdateTime = now;
         }
       }
 
       // Final update to ensure we have the complete text
-      handleUpdateSubpoint(finalTextRef.current);
+      console.log("Final text from inspire:", finalTextRef.current);
+      
+      // Force a direct update to Redux with the final text
+      dispatch(
+        updateSelectedSubpoint({
+          point: targetPoint.current,
+          subpoint: targetSubpoint.current,
+          content: finalTextRef.current
+        })
+      );
       
       // Clean up any pending debounced updates
       if (streamDebounceTimerRef.current) {
@@ -152,7 +163,7 @@ const InspireButton: React.FC = () => {
         streamDebounceTimerRef.current = null;
       }
 
-      // Save final generated text
+      // Save final generated text to backend
       save(
         finalTextRef.current,
         targetSubpoint.current,

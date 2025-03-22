@@ -161,7 +161,6 @@ const ModifyButton: React.FC<ModifyProps> = ({
   // };
 
   const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    console.log("BLUR");
     e.stopPropagation();
     if (onInputFocus) onInputFocus(false);
   };

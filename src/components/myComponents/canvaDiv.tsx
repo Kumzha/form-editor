@@ -412,21 +412,25 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
   
       // Update content when it changes in Redux
       useEffect(() => {
+        // Always update when currentContent changes and doesn't match local state
         if (plainText !== currentContent) {
-          // Simply update the state and let React handle the DOM
+          console.log("Updating from Redux:", currentContent);
+          
+          // Update state
           setPlainText(currentContent);
-
+          
+          // Directly update DOM
+          if (contentEditableRef.current) {
+            contentEditableRef.current.textContent = currentContent;
+          }
+          
           // AR REIKALINGA
           setSegments([{ id: generateId(), text: currentContent }]);
-          
-          // We'll completely avoid direct DOM manipulation for Redux updates
-          // since this is what's causing the removeChild issue during streaming
         }
       }, [currentContent, plainText]);
 
     const removeHighlight = () => {
         if (!contentEditableRef.current) return;
-        console.log("removeHighlight");
         const plainText = contentEditableRef.current.textContent || "";
     
         setSelectedText("");
@@ -443,7 +447,6 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     
         // Skip if we're already highlighting or an input is focused
         if (isHighlightingRef.current || isInputFocusedRef.current) {
-          console.log("skip");
           return;
         }
     
@@ -454,16 +457,12 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
           selectionTemp.isCollapsed ||
           !contentEditableRef.current
         ) {
-          console.log(selectionTemp);
-          console.log(selectionTemp?.isCollapsed);
-          console.log(contentEditableRef.current);
           return;
         }
     
         const selectedText = selectionTemp.toString().trim();
     
         if (!selectedText) {
-          console.log("no text");
           return;
         }
     
@@ -502,6 +501,30 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         setIsPopupOpen(true);
       };
 
+      // Learn how this works
+      const adjustHeight = useCallback(() => {
+        if (contentEditableRef.current) {
+          // Store the current scroll position
+          const scrollPos = window.scrollY;
+          
+          // Reset height to calculate the real content height
+          contentEditableRef.current.style.height = "auto";
+          
+          // Add extra padding for comfortable editing (prevents hitting the bottom)
+          const extraPadding = 10; // 10px extra space at bottom
+          contentEditableRef.current.style.height = 
+            `${Math.max(60, contentEditableRef.current.scrollHeight + extraPadding)}px`;
+          
+          // Always hide overflow-y to prevent scrollbars inside the div
+          contentEditableRef.current.style.overflowY = "hidden";
+          
+          // Restore the scroll position to prevent the page from jumping
+          window.scrollTo({top: scrollPos});
+          
+          console.log("Height adjusted to:", contentEditableRef.current.style.height);
+        }
+      }, []);
+
       const handleTextInput = () => {
         if (!contentEditableRef.current || isHighlightingRef.current) return;
     
@@ -510,6 +533,12 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     
         setPlainText(newText);
         setHighlight(null);
+        
+        // Adjust the height whenever text changes
+        adjustHeight();
+        
+        // Save content to Redux and backend
+        saveContent(newText);
       };
 
       const handlePaste = (e: React.ClipboardEvent) => {
@@ -568,9 +597,6 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
   const handleInputFocus = (focused: boolean) => {
     isInputFocusedRef.current = focused;
   };
-  useEffect(() => {  
-    console.log(plainText);
-  }, [plainText]);
       
     // NEW NEW NEW FUNCTIONALITY
         // NEW NEW NEW FUNCTIONALITY
@@ -585,15 +611,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     // OLD BUT NEW FUNCTIONALITY
       
     // Learn how this works
-    const adjustHeight = useCallback(() => {
-        if (contentEditableRef.current) {
-          contentEditableRef.current.style.height = "auto";
-          contentEditableRef.current.style.height = `${contentEditableRef.current.scrollHeight}px`;
-          contentEditableRef.current.style.overflowY = "hidden";
-        }
-      }, []);
-  
-      useEffect(() => {
+    useEffect(() => {
         if (!contentEditableRef.current) return;
   
         const resizeObserver = new ResizeObserver(() => {
@@ -619,10 +637,18 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     // OLD BUT NEW FUNCTIONALITY
     // OLD BUT NEW FUNCTIONALITY
 
+    // Adjust height when plainText changes
+    useEffect(() => {
+      // Let the DOM update first, then adjust height
+      setTimeout(adjustHeight, 0);
+    }, [plainText, adjustHeight]);
+    
     // Set initial content when component mounts
     useEffect(() => {
         if (contentEditableRef.current && plainText) {
             contentEditableRef.current.textContent = plainText;
+            // Adjust height after setting initial content
+            setTimeout(adjustHeight, 0);
         }
     }, []);
 
@@ -633,12 +659,47 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         }
     }, [plainText]);
 
+    // Expose methods to parent components via ref
+    useImperativeHandle(ref, () => ({
+      getValue: () => plainText,
+      setValue: (value: string) => {
+        console.log("CanvaDiv setValue called with:", value);
+        
+        // Update the state
+        setPlainText(value);
+        
+        // Update the DOM directly and force a re-render
+        setTimeout(() => {
+          if (contentEditableRef.current) {
+            contentEditableRef.current.textContent = value;
+          }
+        }, 0);
+        
+        // Update segments
+        setSegments([{ id: generateId(), text: value }]);
+        
+        // Save to Redux store and backend (optional - commented out to avoid double saves)
+        // saveContent(value);
+      },
+      highlightText: (text: string, className: string) => {
+        // Implement if needed
+      },
+      removeHighlights: () => {
+        removeHighlight();
+      },
+      focus: () => {
+        if (contentEditableRef.current) {
+          contentEditableRef.current.focus();
+        }
+      }
+    }), [plainText]);
+
     return (
         <div className="relative w-full" ref={containerRef}>
             <div
                 ref={contentEditableRef}
                 className={cn(
-                    "block whitespace-pre-wrap text-left min-h-[60px] w-full rounded-md px-3 py-2 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none bg-[#FCFAF4]",
+                    "block whitespace-pre-wrap text-left min-h-[60px] w-full rounded-md px-3 py-2 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none bg-[#FCFAF4] overflow-hidden",
                     variantClasses[variant],
                     className
                 )}
@@ -648,6 +709,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
                 onSelect={handleSelection}
                 onInput={handleTextInput}
                 onPaste={handlePaste}
+                style={{ minHeight: "60px", height: "auto", overflowY: "hidden" }}
             />
 
             {highlight && isPopupOpen && highlight.rect && (
