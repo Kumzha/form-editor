@@ -181,7 +181,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
 
   return (
     <div
-      className="flex flex-row w-full h-8 items-center"
+      className="flex flex-row w-full h-8 items-center bg-transparent"
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >

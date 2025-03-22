@@ -182,6 +182,7 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
           onClick={(e) => e.stopPropagation()} // Stop propagation here too
         >
           <div
+            className="w-full"
             onClick={(e) => {
               e.stopPropagation(); // Stop event propagation
               handleApply(e);

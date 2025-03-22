@@ -573,7 +573,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       // Create the HTML with the highlight span, being careful not to add extra spaces
       contentEditableRef.current.innerHTML =
         beforeText +
-        `<span class="bg-red-500 text-white">${highlightedText}</span>` +
+        `<span class="bg-blue-600 text-white">${highlightedText}</span>` +
         afterText;
 
       // Update text state to match the current content
