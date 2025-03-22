@@ -31,6 +31,7 @@ interface CanvaDivProps extends React.HTMLAttributes<HTMLDivElement> {
   index: number;
   onContentChange?: (value: string) => void; // Optional callback for content changes
   onSelection?: (selectedText: string) => void; // Optional callback for text selection
+  onApply?: () => void; // Optional callback for apply action
 }
 
 export interface CanvaDivRef {
@@ -56,6 +57,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       index,
       onContentChange,
       onSelection,
+      onApply,
       ...props
     },
     ref
@@ -590,6 +592,11 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       applyHighlight(highlight);
       if (selectionObject) {
         selectionObject.removeAllRanges();
+      }
+      
+      // After highlighting, call onApply if available
+      if (onApply) {
+        onApply();
       }
     }, 10);
   };

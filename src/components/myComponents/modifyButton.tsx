@@ -42,7 +42,16 @@ function isFormIdObject(value: any): value is { $oid: string } {
 // Track active modify operations
 const activeModifyOperations = new Set<string>();
 
+// Mock API function for testing
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // For testing purposes, return "MODIFY" as the API response
+  return { result: "MODIFY" };
+  
+  // Original implementation (commented out for now)
+  /*
   const token = localStorage.getItem("authToken");
 
   const response = await fetch(`${BASE_URL}/retrieval/update-field`, {
@@ -60,6 +69,7 @@ const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
   }
 
   return response.json();
+  */
 };
 
 const ModifyButton: React.FC<ModifyProps> = ({
@@ -104,24 +114,63 @@ const ModifyButton: React.FC<ModifyProps> = ({
       targetSubpoint.current = subpointIndex;
     },
     onSuccess: (data) => {
-      // Update the specific subpoint that was modified
-      dispatch(
-        updateSelectedSubpoint({
-          point: targetPoint.current,
-          subpoint: targetSubpoint.current,
-          content: data.result,
-        })
-      );
+      // Find any highlighted text span in the document
+      const highlightedSpan = document.querySelector('.bg-blue-600.text-white');
+      
+      if (highlightedSpan) {
+        // Replace only the highlighted text with the API result
+        highlightedSpan.textContent = data.result;
+        
+        // After replacing the text, get the updated full content
+        const parentElement = highlightedSpan.parentElement;
+        const updatedContent = parentElement?.textContent || subpointText;
+        
+        // Update Redux with the full updated content
+        dispatch(
+          updateSelectedSubpoint({
+            point: targetPoint.current,
+            subpoint: targetSubpoint.current,
+            content: updatedContent,
+          })
+        );
 
-      save(
-        data.result,
-        targetSubpoint.current,
-        targetPoint.current,
-        isFormIdObject(selectedForm?.form_id)
-          ? selectedForm.form_id.$oid
-          : selectedForm?.form_id || "",
-        selectedForm?.name || ""
-      );
+        // Save the updated content to backend
+        save(
+          updatedContent,
+          targetSubpoint.current,
+          targetPoint.current,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+        
+        // Remove the highlight styling after applying
+        const spanParent = highlightedSpan.parentNode;
+        if (spanParent) {
+          const textNode = document.createTextNode(data.result);
+          spanParent.replaceChild(textNode, highlightedSpan);
+        }
+      } else {
+        // Fallback to original behavior if no highlight span is found
+        dispatch(
+          updateSelectedSubpoint({
+            point: targetPoint.current,
+            subpoint: targetSubpoint.current,
+            content: data.result,
+          })
+        );
+
+        save(
+          data.result,
+          targetSubpoint.current,
+          targetPoint.current,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+      }
     },
     onError: (error) => {
       console.error("Error updating form:", error.message);
@@ -150,7 +199,16 @@ const ModifyButton: React.FC<ModifyProps> = ({
       subpoint_text: subpointText,
     };
 
+    // Trigger the mutation
     modifyMutation.mutate(data);
+    
+    // Clear input after submitting
+    setUserPrompt("");
+    
+    // Call onApply callback if it exists
+    if (onApply) {
+      onApply();
+    }
   };
 
   // Handle input focus events
