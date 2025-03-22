@@ -19,6 +19,8 @@ interface ModifyProps {
   formName: string;
   subpointIndex: number;
   index: number;
+  onInputFocus?: (focused: boolean) => void;
+  onApply?: () => void;
 }
 
 type UpdateFieldRequest = {
@@ -40,7 +42,16 @@ function isFormIdObject(value: any): value is { $oid: string } {
 // Track active modify operations
 const activeModifyOperations = new Set<string>();
 
+// Mock API function for testing
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // For testing purposes, return "MODIFY" as the API response
+  return { result: "MODIFY" };
+  
+  // Original implementation (commented out for now)
+  /*
   const token = localStorage.getItem("authToken");
 
   const response = await fetch(`${BASE_URL}/retrieval/update-field`, {
@@ -58,6 +69,7 @@ const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
   }
 
   return response.json();
+  */
 };
 
 const ModifyButton: React.FC<ModifyProps> = ({
@@ -65,6 +77,8 @@ const ModifyButton: React.FC<ModifyProps> = ({
   query,
   formName,
   subpointIndex,
+  onInputFocus,
+  onApply,
 }) => {
   const dispatch = useDispatch();
 
@@ -72,11 +86,12 @@ const ModifyButton: React.FC<ModifyProps> = ({
     (state: RootState) => state.userForms
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [userPrompt, setUserPrompt] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handlePromptChange = (value: string) => {
-    setUserPrompt(value);
+  const handlePromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation(); // Stop event propagation
+    setUserPrompt(e.target.value);
   };
 
   const { save } = useSaveSubpoint();
@@ -99,24 +114,63 @@ const ModifyButton: React.FC<ModifyProps> = ({
       targetSubpoint.current = subpointIndex;
     },
     onSuccess: (data) => {
-      // Update the specific subpoint that was modified
-      dispatch(
-        updateSelectedSubpoint({
-          point: targetPoint.current,
-          subpoint: targetSubpoint.current,
-          content: data.result,
-        })
-      );
+      // Find any highlighted text span in the document
+      const highlightedSpan = document.querySelector('.bg-blue-600.text-white');
+      
+      if (highlightedSpan) {
+        // Replace only the highlighted text with the API result
+        highlightedSpan.textContent = data.result;
+        
+        // After replacing the text, get the updated full content
+        const parentElement = highlightedSpan.parentElement;
+        const updatedContent = parentElement?.textContent || subpointText;
+        
+        // Update Redux with the full updated content
+        dispatch(
+          updateSelectedSubpoint({
+            point: targetPoint.current,
+            subpoint: targetSubpoint.current,
+            content: updatedContent,
+          })
+        );
 
-      save(
-        data.result,
-        targetSubpoint.current,
-        targetPoint.current,
-        isFormIdObject(selectedForm?.form_id)
-          ? selectedForm.form_id.$oid
-          : selectedForm?.form_id || "",
-        selectedForm?.name || ""
-      );
+        // Save the updated content to backend
+        save(
+          updatedContent,
+          targetSubpoint.current,
+          targetPoint.current,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+        
+        // Remove the highlight styling after applying
+        const spanParent = highlightedSpan.parentNode;
+        if (spanParent) {
+          const textNode = document.createTextNode(data.result);
+          spanParent.replaceChild(textNode, highlightedSpan);
+        }
+      } else {
+        // Fallback to original behavior if no highlight span is found
+        dispatch(
+          updateSelectedSubpoint({
+            point: targetPoint.current,
+            subpoint: targetSubpoint.current,
+            content: data.result,
+          })
+        );
+
+        save(
+          data.result,
+          targetSubpoint.current,
+          targetPoint.current,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+      }
     },
     onError: (error) => {
       console.error("Error updating form:", error.message);
@@ -128,7 +182,9 @@ const ModifyButton: React.FC<ModifyProps> = ({
     },
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+
     if (!userPrompt || !query || !formName || !subpointText) {
       toast.error("Please fill in all fields.");
       return;
@@ -143,20 +199,73 @@ const ModifyButton: React.FC<ModifyProps> = ({
       subpoint_text: subpointText,
     };
 
+    // Trigger the mutation
     modifyMutation.mutate(data);
+    
+    // Clear input after submitting
+    setUserPrompt("");
+    
+    // Call onApply callback if it exists
+    if (onApply) {
+      onApply();
+    }
   };
+
+  // Handle input focus events
+  // const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  //   e.stopPropagation();
+  //   console.log("Input focus");
+  //   if (onInputFocus) onInputFocus(true);
+  // };
+
+  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.stopPropagation();
+    if (onInputFocus) onInputFocus(false);
+  };
+
+  // Focus the input automatically when it mounts
+  // useEffect(() => {
+  //   if (inputRef.current) {
+  //     // Small delay to ensure the popup is fully rendered
+  //     setTimeout(() => {
+  //       if (inputRef.current) {
+  //         inputRef.current.focus();
+  //       }
+  //     }, 100);
+  //   }
+  // }, []);
 
   const isPending = modifyMutation.isPending || isModifyActive;
 
   return (
-    <div className="flex flex-row w-full h-8 items-center">
-      {" "}
+    <div
+      className="flex flex-row w-full h-8 items-center bg-transparent"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <Input
-        onChange={(e) => handlePromptChange(e.target.value)}
+        ref={inputRef}
+        onChange={handlePromptChange}
         placeholder="Enter your prompt"
         className="bg-[#FCFAF4] mx-1 w-full rounded-2xl border-none"
         value={userPrompt}
         disabled={isPending || !subpointText}
+        onBlur={handleInputBlur}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          if (onApply) onApply();
+          setTimeout(() => {
+            if (inputRef.current) {
+              inputRef.current.focus();
+              // Force the input to be editable if needed
+              inputRef.current.readOnly = false;
+
+              // If the above doesn't work, try this trick to force focus
+              inputRef.current.blur();
+              inputRef.current.focus();
+            }
+          }, 50);
+        }}
       />
       <div
         className={`
@@ -174,6 +283,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
         }
       `}
         onClick={isPending ? undefined : handleSubmit}
+        onMouseDown={(e) => e.stopPropagation()}
         aria-disabled={isPending}
       >
         <div className="relative">

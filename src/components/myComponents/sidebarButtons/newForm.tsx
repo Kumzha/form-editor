@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, UseMutationResult } from "@tanstack/react-query";
 import { BASE_URL } from "@/constants/constants";
 import { toast } from "sonner";
 import { setSelectedForm } from "@/store/forms/formSlice";
@@ -105,7 +105,7 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
     return response;
   };
 
-  const { mutate: createForm } = useMutation<Response, Error>({
+  const { mutate: createForm, isPending } = useMutation<Response, Error>({
     mutationFn: createNewForm,
     onSuccess: async () => {
       const forms = await refresh();
@@ -251,8 +251,8 @@ const NewForm: React.FC<{ isOpen: boolean }> = ({ isOpen }) => {
         </div>
 
         <DialogFooter>
-          <Button variant="primary" onClick={handleSubmit}>
-            Submit
+          <Button variant="primary" onClick={handleSubmit} disabled={isPending}>
+          {isPending ? "Loading..." : "Submit"}
           </Button>
         </DialogFooter>
       </DialogContent>

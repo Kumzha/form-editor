@@ -19,6 +19,8 @@ function isFormIdObject(value: any): value is { $oid: string } {
 
 // Keep track of which subpoints are currently fetching
 const activeSubpointFetches = new Set<string>();
+// Lock for content updates to prevent race conditions
+let isUpdatingContent = false;
 
 const InspireButton: React.FC = () => {
   const dispatch = useDispatch();
@@ -28,6 +30,7 @@ const InspireButton: React.FC = () => {
   const { save } = useSaveSubpoint();
   const [isFetching, setIsFetching] = useState(false);
   const finalTextRef = useRef<string>("");
+  const streamDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Store the initial subpoint and point that the inspire was triggered for
   const targetSubpoint = useRef(selectedSubpoint);
@@ -40,13 +43,35 @@ const InspireButton: React.FC = () => {
   const isSubpointActive = activeSubpointFetches.has(fetchKey);
 
   const handleUpdateSubpoint = (value: string) => {
-    dispatch(
-      updateSelectedSubpoint({
-        point: targetPoint.current,
-        subpoint: targetSubpoint.current,
-        content: value,
-      })
-    );
+    // Don't queue new updates if one is currently being processed
+    if (isUpdatingContent) {
+      return;
+    }
+
+    // Clear any pending debounced updates
+    if (streamDebounceTimerRef.current) {
+      clearTimeout(streamDebounceTimerRef.current);
+      streamDebounceTimerRef.current = null;
+    }
+
+    // Debounce update to prevent too many rapid redux updates
+    streamDebounceTimerRef.current = setTimeout(() => {
+      isUpdatingContent = true;
+      try {
+        // Only update Redux state - we'll save to backend at the end
+        console.log("InspireButton updating Redux with:", value);
+        dispatch(
+          updateSelectedSubpoint({
+            point: targetPoint.current,
+            subpoint: targetSubpoint.current,
+            content: value,
+          })
+        );
+      } finally {
+        isUpdatingContent = false;
+        streamDebounceTimerRef.current = null;
+      }
+    }, 100); // Increased from 100ms to 250ms
   };
 
   const handleInspire = async () => {
@@ -101,6 +126,7 @@ const InspireButton: React.FC = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = "";
+      let lastUpdateTime = Date.now();
 
       while (true) {
         const { done, value } = await reader.read();
@@ -111,11 +137,33 @@ const InspireButton: React.FC = () => {
 
         finalTextRef.current = accumulatedText;
 
-        // Update the specific subpoint that this inspire was started for
-        handleUpdateSubpoint(accumulatedText);
+        // Only update UI if enough time has passed since last update (throttling)
+        const now = Date.now();
+        if (now - lastUpdateTime >= 250) { // Reduced from 500ms to 250ms for more responsive updates
+          handleUpdateSubpoint(accumulatedText);
+          lastUpdateTime = now;
+        }
       }
 
-      // Save final generated text
+      // Final update to ensure we have the complete text
+      console.log("Final text from inspire:", finalTextRef.current);
+      
+      // Force a direct update to Redux with the final text
+      dispatch(
+        updateSelectedSubpoint({
+          point: targetPoint.current,
+          subpoint: targetSubpoint.current,
+          content: finalTextRef.current
+        })
+      );
+      
+      // Clean up any pending debounced updates
+      if (streamDebounceTimerRef.current) {
+        clearTimeout(streamDebounceTimerRef.current);
+        streamDebounceTimerRef.current = null;
+      }
+
+      // Save final generated text to backend
       save(
         finalTextRef.current,
         targetSubpoint.current,

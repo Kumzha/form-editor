@@ -4,30 +4,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import ModifyButton from "./modifyButton";
+import { useRef, useState, useEffect, FC, RefObject } from "react";
 
 interface SelectionPopupProps {
-  index: number;
   selectedText: string;
-  subpointText: string;
   rect: DOMRect;
-  parentRef: React.RefObject<HTMLElement>;
+  parentRef: RefObject<HTMLDivElement>;
   onClose: () => void;
+  index: number;
+  subpointText: string;
+  reselectText?: () => boolean;
+  onApply?: () => void;
+  onInputFocus?: (focused: boolean) => void;
 }
 
-export function SelectionPopup({
+export const SelectionPopup: FC<SelectionPopupProps> = ({
   selectedText,
   rect,
   parentRef,
+  onClose,
   index,
   subpointText,
-  onClose,
-}: SelectionPopupProps) {
-  const popupRef = React.useRef<HTMLDivElement>(null);
-  const [position, setPosition] = React.useState<{
+  onApply,
+  onInputFocus,
+}) => {
+  const popupRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{
     top: number;
     left: number;
   } | null>(null);
-  const [mounted, setMounted] = React.useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
@@ -40,13 +46,13 @@ export function SelectionPopup({
   const formName = selectedForm?.name || "";
 
   // Mount state for client-side rendering
-  React.useEffect(() => {
+  useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
   }, []);
 
   // Calculate position for the popup relative to its parent container
-  React.useEffect(() => {
+  useEffect(() => {
     if (!mounted || !popupRef.current || !parentRef.current) return;
 
     const calculatePosition = () => {
@@ -90,7 +96,9 @@ export function SelectionPopup({
 
     // Create a ResizeObserver to handle popup size changes
     const resizeObserver = new ResizeObserver(calculatePosition);
-    resizeObserver.observe(popupRef.current);
+    if (popupRef.current) {
+      resizeObserver.observe(popupRef.current);
+    }
 
     // Initial calculation
     calculatePosition();
@@ -101,14 +109,28 @@ export function SelectionPopup({
     };
   }, [rect, parentRef, mounted]);
 
-  // Handle click outside
-  React.useEffect(() => {
+  // useEffect(() => {
+  //   if (onApply) {
+  //     onApply();
+  //   }
+  // }, []);
+  // Handle click outside - modified to not close when clicking inside the popup
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         popupRef.current &&
         !popupRef.current.contains(event.target as Node)
       ) {
-        onClose();
+        // Check if the click is on an input element inside the popup
+        const target = event.target as HTMLElement;
+        const isInputInsidePopup =
+          popupRef.current.contains(target) &&
+          (target.tagName === "INPUT" || target.closest("input"));
+
+        // Only close if not clicking on an input element
+        if (!isInputInsidePopup) {
+          onClose();
+        }
       }
     };
 
@@ -122,10 +144,18 @@ export function SelectionPopup({
     };
   }, [onClose, mounted]);
 
-  // Prevent clicks inside the popup from bubbling up to the document
-  const handlePopupClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  // Function to handle the apply button click
+  const handleApply = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
+    if (onApply) {
+      onApply();
+    }
   };
+
+  // Stop propagation for input interactions to prevent popup from closing
+  // const handleInputInteraction = (e: React.SyntheticEvent) => {
+  //   e.stopPropagation();
+  // };
 
   // The actual popup component
   const popupElement = (
@@ -139,7 +169,7 @@ export function SelectionPopup({
         opacity: position ? 1 : 0,
         transition: "opacity 0.15s ease-in-out",
       }}
-      onClick={handlePopupClick}
+      onClick={(e) => e.stopPropagation()} // Stop click propagation at the container level
     >
       <AnimatePresence>
         <motion.div
@@ -149,22 +179,33 @@ export function SelectionPopup({
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.3 }}
           className="flex gap-1 items-center"
+          onClick={(e) => e.stopPropagation()} // Stop propagation here too
         >
-          <ModifyButton
-            subpointText={subpointText}
-            selectedText={selectedText}
-            query={prompt}
-            subpointIndex={index}
-            formName={formName}
-            index={index}
-          />
+          <div
+            className="w-full"
+            onClick={(e) => {
+              e.stopPropagation(); // Stop event propagation
+              handleApply(e);
+            }}
+            onMouseDown={(e) => e.stopPropagation()} // Prevent selection cancellation
+          >
+            <ModifyButton
+              subpointText={subpointText}
+              selectedText={selectedText}
+              query={prompt}
+              subpointIndex={index}
+              formName={formName}
+              index={index}
+              onApply={onApply}
+              onInputFocus={onInputFocus}
+            />
+          </div>
         </motion.div>
       </AnimatePresence>
     </div>
   );
 
-  // Render relative to parent instead of document.body, with null check
   return mounted && parentRef.current
     ? createPortal(popupElement, parentRef.current)
     : null;
-}
+};

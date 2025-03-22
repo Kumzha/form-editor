@@ -20,7 +20,7 @@ const saveSubpoint = async (
   const token = localStorage.getItem("authToken");
 
   // Log the payload for debugging
-  console.log("Payload sent to API:", data);
+  // console.log("Payload sent to API:", data);
 
   // Note the use of template literals for both the URL and the Authorization header.
   const response = await fetch(`${BASE_URL}/form-update`, {
@@ -36,6 +36,7 @@ const saveSubpoint = async (
   if (!response.ok) {
     throw new Error("Failed to update form");
   }
+  
   return response.json();
 };
 
@@ -44,9 +45,11 @@ export const useSaveSubpoint = () => {
     mutationFn: saveSubpoint,
     onSuccess: (data) => {
       console.log("Subpoint updated successfully!", data);
+      toast.success("Subpoint updated successfully!");
     },
     onError: (error) => {
       console.error("Error updating subpoint:", error.message);
+      toast.error("Failed to update form");
     },
   });
 
@@ -65,6 +68,11 @@ export const useSaveSubpoint = () => {
     formId: string,
     formName: string
   ) => {
+    if (!formId || !formName) {
+      console.warn("Missing form ID or name, skipping save to backend");
+      return;
+    }
+    
     const data: SaveRequestSchema = {
       form_name: formName,
       form_id: formId,
@@ -72,7 +80,7 @@ export const useSaveSubpoint = () => {
       form_point: selectedPoint,
       form_subpoint: selectedSubpoint,
     };
-    toast.success("Subpoint updated successfully!");
+    
     mutation.mutate(data);
   };
 
