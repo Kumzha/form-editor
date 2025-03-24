@@ -28,6 +28,7 @@ type UpdateFieldRequest = {
   prompt_text: string;
   form_name: string;
   subpoint_text: string;
+  selected_text: string;
 };
 
 type ApiResponse = {
@@ -42,16 +43,8 @@ function isFormIdObject(value: any): value is { $oid: string } {
 // Track active modify operations
 const activeModifyOperations = new Set<string>();
 
-// Mock API function for testing
+// API function to update the field
 const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // For testing purposes, return "MODIFY" as the API response
-  return { result: "MODIFY" };
-  
-  // Original implementation (commented out for now)
-  /*
   const token = localStorage.getItem("authToken");
 
   const response = await fetch(`${BASE_URL}/retrieval/update-field`, {
@@ -69,10 +62,10 @@ const updateField = async (data: UpdateFieldRequest): Promise<ApiResponse> => {
   }
 
   return response.json();
-  */
 };
 
 const ModifyButton: React.FC<ModifyProps> = ({
+  selectedText,
   subpointText,
   query,
   formName,
@@ -197,6 +190,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
       prompt_text: query,
       form_name: formName,
       subpoint_text: subpointText,
+      selected_text: selectedText || subpointText,
     };
 
     // Trigger the mutation
