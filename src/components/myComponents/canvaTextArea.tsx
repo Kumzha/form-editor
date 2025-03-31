@@ -27,17 +27,17 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
       const canvaDiv = divElementRef.current.querySelector('[contenteditable="true"]');
       
       if (canvaDiv) {
-        // Calculate the content height with extra padding
-        const contentHeight = Math.max(60, canvaDiv.scrollHeight + 10);
+        // Get the computed height of the contentEditable element
+        const computedHeight = (canvaDiv as HTMLElement).style.height;
+        const contentHeight = parseInt(computedHeight) || Math.max(60, (canvaDiv as HTMLElement).scrollHeight + 10);
         
-        // Apply the height to both parent and child
-        divElementRef.current.style.height = `${contentHeight}px`;
+        // Only update if the height has actually changed
+        if (divElementRef.current.style.height !== `${contentHeight}px`) {
+          // Apply the height to parent container
+          divElementRef.current.style.height = `${contentHeight}px`;
+        }
         
-        // Cast to HTMLElement to access style property
-        (canvaDiv as HTMLElement).style.height = `${contentHeight}px`;
-        (canvaDiv as HTMLElement).style.overflowY = "hidden";
-        
-        console.log("CanvaTextArea: adjusted height to", contentHeight);
+        // No need to set height on canvaDiv again - it handles its own height now
       }
     }
   }, []);
@@ -46,39 +46,68 @@ const CanvaTextArea: React.FC<CanvaTextAreaProps> = ({ index }) => {
   useEffect(() => {
     // For Inspire button to work properly, we need to ensure the divRef is updated
     if (divRef.current) {
-      console.log("CanvaTextArea: Redux content changed to:", currentContent);
-      
       // Always update when content changes from Redux, even if the ref's getValue might report 
       // the same value (since there could be pending updates)
       divRef.current.setValue(currentContent);
       
-      // Force height adjustment
-      setTimeout(adjustDivHeight, 10);
+      // Request animation frame for smoother updates
+      requestAnimationFrame(adjustDivHeight);
     }
   }, [currentContent, adjustDivHeight]);
 
-  // Handle window resize
+  // Handle window resize with debounce
   useEffect(() => {
-    const handleResize = () => adjustDivHeight();
+    let resizeTimeout: NodeJS.Timeout | null = null;
+    
+    const handleResize = () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      resizeTimeout = setTimeout(() => {
+        adjustDivHeight();
+      }, 100);
+    };
+    
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    return () => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+      window.removeEventListener("resize", handleResize);
+    };
   }, [adjustDivHeight]);
 
   // Set up an observer just for height adjustment
   useEffect(() => {
     if (!divElementRef.current) return;
 
+    let mutationTimeout: NodeJS.Timeout | null = null;
+    
     const observer = new MutationObserver(() => {
-      adjustDivHeight();
+      // Debounce mutation observer callbacks
+      if (mutationTimeout) {
+        clearTimeout(mutationTimeout);
+      }
+      mutationTimeout = setTimeout(() => {
+        adjustDivHeight();
+      }, 50);
     });
 
     observer.observe(divElementRef.current, {
       childList: true,
       characterData: true,
       subtree: true,
+      attributes: true,
+      attributeFilter: ['style']
     });
 
-    return () => observer.disconnect();
+    return () => {
+      if (mutationTimeout) {
+        clearTimeout(mutationTimeout);
+      }
+      observer.disconnect();
+    };
   }, [adjustDivHeight]);
 
   return (

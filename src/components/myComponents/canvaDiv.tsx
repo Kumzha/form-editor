@@ -514,16 +514,18 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
           
           // Add extra padding for comfortable editing (prevents hitting the bottom)
           const extraPadding = 10; // 10px extra space at bottom
-          contentEditableRef.current.style.height = 
-            `${Math.max(60, contentEditableRef.current.scrollHeight + extraPadding)}px`;
+          const newHeight = Math.max(60, contentEditableRef.current.scrollHeight + extraPadding);
+          
+          // Only update height if it has actually changed
+          if (parseInt(contentEditableRef.current.style.height) !== newHeight) {
+            contentEditableRef.current.style.height = `${newHeight}px`;
+          }
           
           // Always hide overflow-y to prevent scrollbars inside the div
           contentEditableRef.current.style.overflowY = "hidden";
           
           // Restore the scroll position to prevent the page from jumping
           window.scrollTo({top: scrollPos});
-          
-          console.log("Height adjusted to:", contentEditableRef.current.style.height);
         }
       }, []);
 
@@ -533,6 +535,15 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         // When typing, update the text state and clear any highlight
         const newText = contentEditableRef.current.textContent || "";
     
+        // Store selection position before updating state
+        const selection = window.getSelection();
+        let cursorPosition = 0;
+        
+        if (selection && selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          cursorPosition = range.startOffset;
+        }
+        
         setPlainText(newText);
         setHighlight(null);
         
@@ -541,6 +552,51 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         
         // Save content to Redux and backend
         saveContent(newText);
+        
+        // Restore cursor position after state update
+        setTimeout(() => {
+          if (contentEditableRef.current && selection && selection.rangeCount > 0) {
+            // Only try to restore if we still have a valid selection
+            try {
+              const range = document.createRange();
+              const textNode = contentEditableRef.current.firstChild || contentEditableRef.current;
+              
+              // Check if we're dealing with a text node or element node
+              if (textNode.nodeType === Node.TEXT_NODE) {
+                // For text nodes, set cursor within the text
+                const offset = Math.min(cursorPosition, (textNode.textContent || "").length);
+                range.setStart(textNode, offset);
+                range.setEnd(textNode, offset);
+              } else if (textNode.nodeType === Node.ELEMENT_NODE && contentEditableRef.current.textContent) {
+                // For element nodes (happens with innerHTML), try to find the right position
+                const walker = document.createTreeWalker(
+                  contentEditableRef.current,
+                  NodeFilter.SHOW_TEXT,
+                  null
+                );
+                
+                let node = walker.nextNode();
+                let offset = cursorPosition;
+                
+                // Walk through text nodes until we find our position
+                while (node && offset > (node.textContent?.length || 0)) {
+                  offset -= node.textContent?.length || 0;
+                  node = walker.nextNode();
+                }
+                
+                if (node) {
+                  range.setStart(node, offset);
+                  range.setEnd(node, offset);
+                }
+              }
+              
+              selection.removeAllRanges();
+              selection.addRange(range);
+            } catch (error) {
+              console.error("Error restoring cursor position:", error);
+            }
+          }
+        }, 0);
       };
 
       const handlePaste = (e: React.ClipboardEvent) => {
@@ -621,20 +677,52 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     useEffect(() => {
         if (!contentEditableRef.current) return;
   
+        // Use a debounced version of adjustHeight to avoid too many resizes
+        let resizeTimeout: NodeJS.Timeout | null = null;
+        
+        const debouncedAdjustHeight = () => {
+          if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+          }
+          resizeTimeout = setTimeout(() => {
+            adjustHeight();
+          }, 50); // Small timeout to batch resize operations
+        };
+  
         const resizeObserver = new ResizeObserver(() => {
-          adjustHeight();
+          debouncedAdjustHeight();
         });
   
         resizeObserver.observe(contentEditableRef.current);
   
         return () => {
+          if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+          }
           resizeObserver.disconnect();
         };
       }, [adjustHeight]);
   
       useEffect(() => {
-        window.addEventListener("resize", adjustHeight);
-        return () => window.removeEventListener("resize", adjustHeight);
+        let resizeTimeout: NodeJS.Timeout | null = null;
+        
+        const handleResize = () => {
+          if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+          }
+          resizeTimeout = setTimeout(() => {
+            adjustHeight();
+          }, 100); // Larger timeout for window resize events which are less critical
+        };
+        
+        window.addEventListener("resize", handleResize);
+        
+        return () => {
+          if (resizeTimeout) {
+            clearTimeout(resizeTimeout);
+          }
+          window.removeEventListener("resize", handleResize);
+        };
       }, [adjustHeight]);
 
 
@@ -644,18 +732,22 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     // OLD BUT NEW FUNCTIONALITY
     // OLD BUT NEW FUNCTIONALITY
 
-    // Adjust height when plainText changes
+    // Adjust height when plainText changes - using requestAnimationFrame for smoother updates
     useEffect(() => {
-      // Let the DOM update first, then adjust height
-      setTimeout(adjustHeight, 0);
+      // Use requestAnimationFrame instead of setTimeout for smoother updates
+      let rafId: number;
+      rafId = requestAnimationFrame(() => {
+        adjustHeight();
+      });
+      return () => cancelAnimationFrame(rafId);
     }, [plainText, adjustHeight]);
     
     // Set initial content when component mounts
     useEffect(() => {
         if (contentEditableRef.current && plainText) {
             contentEditableRef.current.textContent = plainText;
-            // Adjust height after setting initial content
-            setTimeout(adjustHeight, 0);
+            // Use requestAnimationFrame for smoother initial height adjustment
+            requestAnimationFrame(adjustHeight);
         }
     }, []);
 
@@ -672,6 +764,16 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       setValue: (value: string) => {
         console.log("CanvaDiv setValue called with:", value);
         
+        // Store current cursor and focus state
+        const hadFocus = document.activeElement === contentEditableRef.current;
+        const selection = window.getSelection();
+        let cursorPosition = 0;
+        
+        if (selection && selection.rangeCount > 0 && hadFocus) {
+          const range = selection.getRangeAt(0);
+          cursorPosition = range.startOffset;
+        }
+        
         // Update the state
         setPlainText(value);
         
@@ -679,14 +781,35 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         setTimeout(() => {
           if (contentEditableRef.current) {
             contentEditableRef.current.textContent = value;
+            
+            // Restore focus and cursor position if we had focus before
+            if (hadFocus) {
+              contentEditableRef.current.focus();
+              
+              try {
+                if (selection) {
+                  const range = document.createRange();
+                  const textNode = contentEditableRef.current.firstChild || contentEditableRef.current;
+                  
+                  // Position cursor - if the new text is shorter than the previous position, place at end
+                  const newPosition = Math.min(cursorPosition, (contentEditableRef.current.textContent || "").length);
+                  
+                  if (textNode.nodeType === Node.TEXT_NODE) {
+                    range.setStart(textNode, newPosition);
+                    range.collapse(true);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                  }
+                }
+              } catch (error) {
+                console.error("Error restoring cursor in setValue:", error);
+              }
+            }
           }
         }, 0);
         
         // Update segments
         setSegments([{ id: generateId(), text: value }]);
-        
-        // Save to Redux store and backend (optional - commented out to avoid double saves)
-        // saveContent(value);
       },
       highlightText: (text: string, className: string) => {
         // Implement if needed
