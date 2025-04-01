@@ -136,229 +136,152 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       ]
     );
 
-    // Highlight specific text with a CSS class
-    // const highlightText = useCallback(
-    //   (textToHighlight: string, highlightClass: string) => {
-    //     if (!textToHighlight || !divRef.current) return;
-
-    //     // First, normalize the text to ensure we're working with the same representation
-    //     const normalizedText = plainText.normalize();
-    //     const normalizedHighlight = textToHighlight.normalize();
-
-    //     // Find the indices of all occurrences (in case there are multiple)
-    //     const indices: number[] = [];
-    //     let startPos = 0;
-    //     let pos: number;
-
-    //     while (
-    //       (pos = normalizedText.indexOf(normalizedHighlight, startPos)) !== -1
-    //     ) {
-    //       indices.push(pos);
-    //       startPos = pos + normalizedHighlight.length;
-    //     }
-
-    //     // If no occurrences found, return
-    //     if (indices.length === 0) return;
-
-    //     // Create new segments
-    //     const newSegments: TextSegment[] = [];
-    //     let lastEnd = 0;
-
-    //     // Process each occurrence
-    //     for (const startIndex of indices) {
-    //       const endIndex = startIndex + normalizedHighlight.length;
-
-    //       // Add text before this occurrence
-    //       if (startIndex > lastEnd) {
-    //         newSegments.push({
-    //           id: generateId(),
-    //           text: plainText.substring(lastEnd, startIndex),
-    //         });
-    //       }
-
-    //       // Add the highlighted segment
-    //       newSegments.push({
-    //         id: generateId(),
-    //         text: plainText.substring(startIndex, endIndex),
-    //         className: highlightClass,
-    //       });
-
-    //       lastEnd = endIndex;
-    //     }
-
-    //     // Add any remaining text
-    //     if (lastEnd < plainText.length) {
-    //       newSegments.push({
-    //         id: generateId(),
-    //         text: plainText.substring(lastEnd),
-    //       });
-    //     }
-
-    //     setSegments(newSegments);
-    //   },
-    //   [plainText]
-    // );
-
-    // Remove all highlights and return to plain text
-    // const removeHighlights = useCallback(() => {
-    //   setSegments([{ id: generateId(), text: plainText }]);
-    // }, [plainText]);
-
-    // Handle text selection from CanvaDiv
-    // const handleSelectionChange = useCallback(() => {
-    //   const windowSelection = window.getSelection();
-
-    //   if (
-    //     windowSelection &&
-    //     windowSelection.toString().trim() !== "" &&
-    //     divRef.current &&
-    //     divRef.current.contains(windowSelection.anchorNode)
-    //   ) {
-    //     const range = windowSelection.getRangeAt(0);
-    //     const selectedText = windowSelection.toString();
-
-    //     // Set the selected subpoint in Redux
-    //     dispatch(setSelectedSubpoint(index));
-
-    //     // Notify through callback if provided
-    //     if (onSelection) {
-    //       onSelection(selectedText);
-    //     }
-
-    //     const tempRange = range.cloneRange();
-    //     const rect = tempRange.getBoundingClientRect();
-
-    //     // Store the selection rect as a DOMRect object that accounts for scrolling
-    //     const selectionRect = new DOMRect(
-    //       rect.left,
-    //       rect.top,
-    //       rect.width,
-    //       rect.height
-    //     );
-
-    //     setSelection({ text: selectedText, rect: selectionRect, isOpen: true });
-    //   }
-    // }, [dispatch, index, onSelection]);
-
-     // Handle input from the contentEditable div - this is key to fixing the cursor jump issue
-    // const handleInput = useCallback(
-    //   (e: React.FormEvent<HTMLDivElement>) => {
-    //     const target = e.target as HTMLDivElement;
-    //     const newText = target.innerText || "";
-
-    //     // Only update if text actually changed to avoid unnecessary rerenders
-    //     if (newText !== plainText) {
-    //       // Update the plain text state
-    //       setPlainText(newText);
-
-    //       // We don't need to update segments here, as that can cause cursor jumps
-    //       // Instead, keep the DOM structure intact and just track the text
-
-    //       // Save the new content
-    //       saveContent(newText);
-    //     }
-    //   },
-    //   [plainText, saveContent]
-    // );
-
-    // Function to close the popup
-
-    // OLD CLOSE POPUP FUNCTIONALITY
-    // const handleClosePopup = useCallback(() => {
-    //   setSelection((prev) => ({
-    //     ...prev,
-    //     isOpen: false,
-    //   }));
-
-    //   // Clear selection after popup is closed
-    //   setTimeout(() => {
-    //     if (!selection.isOpen) {
-    //       setSelection({ text: "", rect: null, isOpen: false });
-    //     }
-    //   }, 150); // Small delay to ensure popup animations complete
-    // }, [selection.isOpen]);
-
-    // Add selection change listener
-    // useEffect(() => {
-    //   document.addEventListener("selectionchange", handleSelectionChange);
-    //   return () => {
-    //     document.removeEventListener("selectionchange", handleSelectionChange);
-    //   };
-    // }, [handleSelectionChange]);
-
-    // Handle mouse up to catch selection immediately and highlight text
-    // const handleMouseUp = () => {
-    //   handleSelectionChange();
-
-    //   // Get the current selection
-    //   const windowSelection = window.getSelection();
-    //   if (
-    //     windowSelection &&
-    //     windowSelection.toString().trim() !== "" &&
-    //     divRef.current &&
-    //     divRef.current.contains(windowSelection.anchorNode)
-    //   ) {
-    //     const selectedText = windowSelection.toString();
-    //     // Highlight the selected text with red background
-    //     highlightText(selectedText, "bg-red-200");
-    //   }
-    // };
+    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    // AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
 
-    // // Expose methods to parent via ref
-    // useImperativeHandle(ref, () => ({
-    //   getValue: () => plainText,
-    //   setValue: (value: string) => {
-    //     if (divRef.current) {
-    //       // Update states first and let React handle rendering
-    //       setPlainText(value);
-    //       setSegments([{ id: generateId(), text: value }]);
+    const normalizeContentEditable = (element: HTMLElement | null) => {
+      if (!element) return;
+      
+      // First pass: collect all text content
+      let allText = '';
+      const childNodes = Array.from(element.childNodes);
+      
+      childNodes.forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          allText += node.textContent || '';
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // For inline elements, get their text content
+          allText += (node as HTMLElement).innerText || '';
+        }
+      });
+      
+      // Clear the element
+      while (element.firstChild) {
+        element.removeChild(element.firstChild);
+      }
+      
+      // Create a single text node with all content
+      if (allText) {
+        const textNode = document.createTextNode(allText);
+        element.appendChild(textNode);
+      }
+      
+      return allText;
+    };
+    
+    /**
+     * Carefully sets cursor position for iOS
+     * This works around various iOS-specific issues with contentEditable
+     */
+    const setCursorPositionIOS = (
+      element: HTMLElement | null,
+      position: number = -1 // -1 means end of content
+    ): boolean => {
+      // Guard against null element
+      if (!element) return false;
+      
+      // Make sure content is normalized first
+      const content = normalizeContentEditable(element);
+      
+      // Determine actual position (end of content if position is -1)
+      const actualPosition = position === -1 ? 
+        (content?.length || 0) : 
+        Math.min(position, content?.length || 0);
+      
+      try {
+        // Focus the element first
+        element.focus();
+        
+        // Small delay for iOS to register the focus
+        setTimeout(() => {
+          // Get the current selection
+          const selection = window.getSelection();
+          if (!selection) return;
           
-    //       // Only attempt to restore focus and cursor position
-    //       try {
-    //         const hadFocus = document.activeElement === divRef.current;
-    //         if (hadFocus) {
-    //           // Wait for React to update the DOM in the next tick
-    //           setTimeout(() => {
-    //             divRef.current?.focus();
-                
-    //             // Move cursor to end
-    //             const selection = window.getSelection();
-    //             if (selection && divRef.current?.lastChild) {
-    //               const range = document.createRange();
-    //               range.selectNodeContents(divRef.current.lastChild);
-    //               range.collapse(false); // collapse to end
-    //               selection.removeAllRanges();
-    //               selection.addRange(range);
-    //             }
-    //           }, 0);
-    //         }
-    //       } catch (error) {
-    //         console.error("Error restoring focus:", error);
-    //       }
+          // Create a new range
+          const range = document.createRange();
           
-    //       // Save the new content
-    //       saveContent(value);
-    //     }
-    //   },
-    //   highlightText,
-    //   removeHighlights,
-    //   focus: () => {
-    //     if (divRef.current) {
-    //       divRef.current.focus();
+          // Make sure we have a text node
+          if (!element.firstChild || element.firstChild.nodeType !== Node.TEXT_NODE) {
+            const textNode = document.createTextNode(content || '');
+            element.appendChild(textNode);
+          }
+          
+          // Set the position in the text node
+          const textNode = element.firstChild;
+          
+          // Check if textNode exists
+          if (!textNode) {
+            console.error('No text node found in element');
+            return;
+          }
+          
+          // Safely set range based on available content
+          const safePosition = Math.min(
+            actualPosition,
+            (textNode.textContent || '').length
+          );
+          
+          range.setStart(textNode, safePosition);
+          range.setEnd(textNode, safePosition);
+          
+          // Apply the range to the selection
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }, 50); // Slightly longer delay for iOS
+        
+        return true;
+      } catch (error) {
+        console.error('Error setting cursor position:', error);
+        return false;
+      }
+    };
+    
+    // Then modify your handleClick function to handle iOS differently:
+    
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!contentEditableRef.current) return;
+      
+      // Detect iOS
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                   !(window as Window & { MSStream?: unknown }).MSStream;
+                   
+      if (isIOS) {
+        // On iOS, we need special handling
+        e.preventDefault(); // Prevent default behavior
+        
+        // Get the click position relative to the content
+        const selection = window.getSelection();
+        if (!selection) return;
+        
+        // Normalize the content first to ensure we have a single text node
+        normalizeContentEditable(contentEditableRef.current);
+        
+        // Get the clicked position approximation
+        // This is tricky on iOS, but we can estimate based on click coordinates
+        const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+        if (!range) {
+          // If we can't get a precise position, just focus the element
+          contentEditableRef.current.focus();
+          return;
+        }
+        
+        // Set the selection at the clicked position
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // For non-iOS, the default browser behavior works fine
+    };
+    
 
-    //       // Place cursor at the end
-    //       const selection = window.getSelection();
-    //       if (selection && divRef.current.lastChild) {
-    //         const range = document.createRange();
-    //         range.selectNodeContents(divRef.current.lastChild);
-    //         range.collapse(false); // collapse to end
-    //         selection.removeAllRanges();
-    //         selection.addRange(range);
-    //       }
-    //     }
-    //   },
-    // }));
+
+
+    // BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+    // BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+    // BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
 
     // Clean up debounce timer on unmount
     useEffect(() => {
@@ -524,113 +447,77 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
 
       const handleTextInput = () => {
         if (!contentEditableRef.current || isHighlightingRef.current) return;
-      
+        
         // When typing, update the text state and clear any highlight
         const newText = contentEditableRef.current.textContent || "";
-      
-        // Store selection position before updating state
-        const selection = window.getSelection();
-        let selectionStart = 0;
-        let selectionEnd = 0;
-        let selectionNode = null;
-        let nodeOffset = 0;
         
-        // More precise selection tracking for iOS
+        // Detect iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && 
+                     !(window as Window & { MSStream?: unknown }).MSStream;
+                     
+        // Store current selection BEFORE updating state
+        const selection = window.getSelection();
+        let cursorPosition = 0;
+        
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
-          selectionStart = range.startOffset;
-          selectionEnd = range.endOffset;
-          selectionNode = range.startContainer;
           
-          // Calculate node offset (how many characters come before this node)
-          if (selectionNode && selectionNode.nodeType === Node.TEXT_NODE && contentEditableRef.current) {
-            let currentNode = contentEditableRef.current.firstChild;
-            nodeOffset = 0;
+          // Store the cursor position
+          if (range.startContainer.nodeType === Node.TEXT_NODE) {
+            // We're in a text node, so we can use the offset directly
+            cursorPosition = range.startOffset;
             
-            while (currentNode && currentNode !== selectionNode) {
-              nodeOffset += (currentNode.textContent || "").length;
-              currentNode = currentNode.nextSibling;
+            // If we're not at the first text node, add the length of previous nodes
+            if (contentEditableRef.current && range.startContainer !== contentEditableRef.current.firstChild) {
+              let node = contentEditableRef.current.firstChild;
+              while (node && node !== range.startContainer) {
+                cursorPosition += (node.textContent || "").length;
+                node = node.nextSibling;
+              }
             }
           }
         }
         
-        // Track if we're dealing with iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
+        // For iOS, normalize the content to a single text node
+        if (isIOS) {
+          normalizeContentEditable(contentEditableRef.current);
+        }
         
+        // Update state
         setPlainText(newText);
         setHighlight(null);
         
-        // Adjust the height whenever text changes
+        // Adjust height
         adjustHeight();
         
-        // Save content to Redux and backend
+        // Save content
         saveContent(newText);
         
-        // Special handling for iOS to prevent cursor jump
-        setTimeout(() => {
-          if (contentEditableRef.current && selection && selection.rangeCount > 0) {
-            try {
-              // For iOS, we need to be more careful about selection restoration
-              if (isIOS) {
-                const totalPosition = nodeOffset + selectionStart;
+        // Restore cursor position
+        if (isIOS) {
+          // Use our special iOS function for cursor positioning
+          setCursorPositionIOS(contentEditableRef.current, cursorPosition);
+        } else {
+          // For other browsers, standard approach works fine
+          setTimeout(() => {
+            if (contentEditableRef.current && selection && selection.rangeCount > 0) {
+              try {
+                const range = document.createRange();
                 const textNode = contentEditableRef.current.firstChild;
                 
                 if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                  const range = document.createRange();
-                  const cursorPosition = Math.min(totalPosition, (textNode.textContent || "").length);
-                  
-                  range.setStart(textNode, cursorPosition);
-                  range.setEnd(textNode, cursorPosition);
-                  
+                  const newPosition = Math.min(cursorPosition, (textNode.textContent || "").length);
+                  range.setStart(textNode, newPosition);
+                  range.setEnd(textNode, newPosition);
                   selection.removeAllRanges();
                   selection.addRange(range);
-                  
-                  // Ensure the cursor is visible
-                  contentEditableRef.current.focus();
                 }
-              } 
-              // For non-iOS, the existing code works fine
-              else {
-                const range = document.createRange();
-                const textNode = contentEditableRef.current.firstChild || contentEditableRef.current;
-                
-                // Check if we're dealing with a text node or element node
-                if (textNode.nodeType === Node.TEXT_NODE) {
-                  // For text nodes, set cursor within the text
-                  const offset = Math.min(selectionStart, (textNode.textContent || "").length);
-                  range.setStart(textNode, offset);
-                  range.setEnd(textNode, offset);
-                } else if (textNode.nodeType === Node.ELEMENT_NODE && contentEditableRef.current.textContent) {
-                  // For element nodes (happens with innerHTML), try to find the right position
-                  const walker = document.createTreeWalker(
-                    contentEditableRef.current,
-                    NodeFilter.SHOW_TEXT,
-                    null
-                  );
-                  
-                  let node = walker.nextNode();
-                  let offset = selectionStart;
-                  
-                  // Walk through text nodes until we find our position
-                  while (node && offset > (node.textContent?.length || 0)) {
-                    offset -= node.textContent?.length || 0;
-                    node = walker.nextNode();
-                  }
-                  
-                  if (node) {
-                    range.setStart(node, offset);
-                    range.setEnd(node, offset);
-                  }
-                }
-                
-                selection.removeAllRanges();
-                selection.addRange(range);
+              } catch (error) {
+                console.error("Error restoring cursor position:", error);
               }
-            } catch (error) {
-              console.error("Error restoring cursor position:", error);
             }
-          }
-        }, 0);
+          }, 0);
+        }
       };
 
       const handlePaste = (e: React.ClipboardEvent) => {
@@ -885,6 +772,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
                 contentEditable
                 suppressContentEditableWarning
                 onMouseDown={() => removeHighlight()}
+                onClick={handleClick}
                 onSelect={handleSelection}
                 onInput={handleTextInput}
                 onPaste={handlePaste}
