@@ -524,18 +524,38 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
 
       const handleTextInput = () => {
         if (!contentEditableRef.current || isHighlightingRef.current) return;
-    
+      
         // When typing, update the text state and clear any highlight
         const newText = contentEditableRef.current.textContent || "";
-    
+      
         // Store selection position before updating state
         const selection = window.getSelection();
-        let cursorPosition = 0;
+        let selectionStart = 0;
+        let selectionEnd = 0;
+        let selectionNode = null;
+        let nodeOffset = 0;
         
+        // More precise selection tracking for iOS
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
-          cursorPosition = range.startOffset;
+          selectionStart = range.startOffset;
+          selectionEnd = range.endOffset;
+          selectionNode = range.startContainer;
+          
+          // Calculate node offset (how many characters come before this node)
+          if (selectionNode && selectionNode.nodeType === Node.TEXT_NODE && contentEditableRef.current) {
+            let currentNode = contentEditableRef.current.firstChild;
+            nodeOffset = 0;
+            
+            while (currentNode && currentNode !== selectionNode) {
+              nodeOffset += (currentNode.textContent || "").length;
+              currentNode = currentNode.nextSibling;
+            }
+          }
         }
+        
+        // Track if we're dealing with iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
         
         setPlainText(newText);
         setHighlight(null);
@@ -546,45 +566,66 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         // Save content to Redux and backend
         saveContent(newText);
         
-        // Restore cursor position after state update
+        // Special handling for iOS to prevent cursor jump
         setTimeout(() => {
           if (contentEditableRef.current && selection && selection.rangeCount > 0) {
-            // Only try to restore if we still have a valid selection
             try {
-              const range = document.createRange();
-              const textNode = contentEditableRef.current.firstChild || contentEditableRef.current;
-              
-              // Check if we're dealing with a text node or element node
-              if (textNode.nodeType === Node.TEXT_NODE) {
-                // For text nodes, set cursor within the text
-                const offset = Math.min(cursorPosition, (textNode.textContent || "").length);
-                range.setStart(textNode, offset);
-                range.setEnd(textNode, offset);
-              } else if (textNode.nodeType === Node.ELEMENT_NODE && contentEditableRef.current.textContent) {
-                // For element nodes (happens with innerHTML), try to find the right position
-                const walker = document.createTreeWalker(
-                  contentEditableRef.current,
-                  NodeFilter.SHOW_TEXT,
-                  null
-                );
+              // For iOS, we need to be more careful about selection restoration
+              if (isIOS) {
+                const totalPosition = nodeOffset + selectionStart;
+                const textNode = contentEditableRef.current.firstChild;
                 
-                let node = walker.nextNode();
-                let offset = cursorPosition;
+                if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                  const range = document.createRange();
+                  const cursorPosition = Math.min(totalPosition, (textNode.textContent || "").length);
+                  
+                  range.setStart(textNode, cursorPosition);
+                  range.setEnd(textNode, cursorPosition);
+                  
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                  
+                  // Ensure the cursor is visible
+                  contentEditableRef.current.focus();
+                }
+              } 
+              // For non-iOS, the existing code works fine
+              else {
+                const range = document.createRange();
+                const textNode = contentEditableRef.current.firstChild || contentEditableRef.current;
                 
-                // Walk through text nodes until we find our position
-                while (node && offset > (node.textContent?.length || 0)) {
-                  offset -= node.textContent?.length || 0;
-                  node = walker.nextNode();
+                // Check if we're dealing with a text node or element node
+                if (textNode.nodeType === Node.TEXT_NODE) {
+                  // For text nodes, set cursor within the text
+                  const offset = Math.min(selectionStart, (textNode.textContent || "").length);
+                  range.setStart(textNode, offset);
+                  range.setEnd(textNode, offset);
+                } else if (textNode.nodeType === Node.ELEMENT_NODE && contentEditableRef.current.textContent) {
+                  // For element nodes (happens with innerHTML), try to find the right position
+                  const walker = document.createTreeWalker(
+                    contentEditableRef.current,
+                    NodeFilter.SHOW_TEXT,
+                    null
+                  );
+                  
+                  let node = walker.nextNode();
+                  let offset = selectionStart;
+                  
+                  // Walk through text nodes until we find our position
+                  while (node && offset > (node.textContent?.length || 0)) {
+                    offset -= node.textContent?.length || 0;
+                    node = walker.nextNode();
+                  }
+                  
+                  if (node) {
+                    range.setStart(node, offset);
+                    range.setEnd(node, offset);
+                  }
                 }
                 
-                if (node) {
-                  range.setStart(node, offset);
-                  range.setEnd(node, offset);
-                }
+                selection.removeAllRanges();
+                selection.addRange(range);
               }
-              
-              selection.removeAllRanges();
-              selection.addRange(range);
             } catch (error) {
               console.error("Error restoring cursor position:", error);
             }
