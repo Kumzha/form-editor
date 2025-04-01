@@ -735,8 +735,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
     // Adjust height when plainText changes - using requestAnimationFrame for smoother updates
     useEffect(() => {
       // Use requestAnimationFrame instead of setTimeout for smoother updates
-      let rafId: number;
-      rafId = requestAnimationFrame(() => {
+      const rafId: number = requestAnimationFrame(() => {
         adjustHeight();
       });
       return () => cancelAnimationFrame(rafId);
