@@ -18,6 +18,19 @@ function isFormIdObject(value: any): value is { $oid: string } {
   return value && typeof value === "object" && "$oid" in value;
 }
 
+const isSafari = () => {
+  const userAgent = navigator.userAgent;
+  return (
+    // iOS Safari
+    (/iPad|iPhone|iPod/.test(userAgent) && 
+     !(window as Window & { MSStream?: unknown }).MSStream) ||
+    // macOS Safari
+    (userAgent.includes('Safari') && 
+     !userAgent.includes('Chrome') && 
+     !userAgent.includes('Chromium'))
+  );
+};
+
 interface CanvaDivProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "newForm" | "secondary";
   defaultValue?: string;
@@ -156,6 +169,60 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
           allText += (node as HTMLElement).innerText || '';
         }
       });
+
+      if (isSafari()) {
+        // For Safari, only normalize if there are multiple nodes or non-text nodes
+        const hasMultipleNodes = childNodes.length > 1;
+        const hasNonTextNodes = childNodes.some(node => node.nodeType !== Node.TEXT_NODE);
+        
+        if (hasMultipleNodes || hasNonTextNodes) {
+          // Store selection position before changes
+          const selection = window.getSelection();
+          let cursorPosition = 0;
+          
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            // Calculate cursor position relative to the start of the element
+            const tempRange = document.createRange();
+            tempRange.setStart(element, 0);
+            tempRange.setEnd(range.startContainer, range.startOffset);
+            cursorPosition = tempRange.toString().length;
+          }
+          
+          // Clear the element
+          while (element.firstChild) {
+            element.removeChild(element.firstChild);
+          }
+          
+          // Create a single text node with all content
+          if (allText) {
+            const textNode = document.createTextNode(allText);
+            element.appendChild(textNode);
+          }
+          
+          // Restore cursor position
+          setTimeout(() => {
+            try {
+              if (document.activeElement === element) {
+                const selection = window.getSelection();
+                if (selection && element.firstChild) {
+                  const range = document.createRange();
+                  const safePosition = Math.min(cursorPosition, (allText || '').length);
+                  range.setStart(element.firstChild, safePosition);
+                  range.collapse(true);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                }
+              }
+            } catch (error) {
+              console.error('Error restoring cursor position:', error);
+            }
+          }, 0);
+        }
+        return allText;
+      }
+
+      
       
       // Clear the element
       while (element.firstChild) {
