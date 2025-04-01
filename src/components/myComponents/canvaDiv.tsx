@@ -770,7 +770,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         setPlainText(value);
         
         // Check if we're on iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as Window & { MSStream?: unknown }).MSStream;
         
         // Update the DOM directly and force a re-render
         setTimeout(() => {
