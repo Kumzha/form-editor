@@ -1,14 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-} from "react";
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
@@ -776,10 +769,26 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         // Update the state
         setPlainText(value);
         
+        // Check if we're on iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        
         // Update the DOM directly and force a re-render
         setTimeout(() => {
           if (contentEditableRef.current) {
-            contentEditableRef.current.textContent = value;
+            // For iOS, we need to normalize text handling
+            if (isIOS) {
+              // First, ensure we only have a single text node to avoid iOS selection issues
+              while (contentEditableRef.current.firstChild) {
+                contentEditableRef.current.removeChild(contentEditableRef.current.firstChild);
+              }
+              
+              // Create a fresh text node
+              const textNode = document.createTextNode(value);
+              contentEditableRef.current.appendChild(textNode);
+            } else {
+              // For other browsers, this simple approach works fine
+              contentEditableRef.current.textContent = value;
+            }
             
             // Restore focus and cursor position if we had focus before
             if (hadFocus) {
@@ -805,7 +814,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
               }
             }
           }
-        }, 0);
+        }, 10); // Slightly longer timeout for iOS
         
         // Update segments
         setSegments([{ id: generateId(), text: value }]);
