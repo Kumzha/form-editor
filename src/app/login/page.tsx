@@ -122,7 +122,7 @@ const LoginPage = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter>
+        {/* <CardFooter>
           <div className="text-sm text-gray-500">
             <div>Don’t have an account?</div>
             <div>
@@ -131,7 +131,7 @@ const LoginPage = () => {
               </a>
             </div>
           </div>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </div>
   );
