@@ -53,7 +53,7 @@ const SubpointsField = () => {
                   </div>
                 </div>
                 {selectedSubpoint === index && (
-                  <div className="absolute top-1/2 right-[-90px] transform -translate-y-1/2 flex flex-col space-y-2">
+                  <div className="absolute top-1/2 right-[-100px] transform -translate-y-1/2 flex flex-col space-y-2">
                     {!subpointContent && <InspireButton />}
                   </div>
                 )}

@@ -22,10 +22,16 @@ export interface FormInterface {
   questions: FormPoint[];
 }
 
+export interface AtachedFile {
+  name: string;
+  type: string;
+}
+
 export interface Form {
   form_id: string;
   form_type: FormInterface;
   name: string;
   initial_context: string[];
   points?: Point[];
+  uploaded_files?: AtachedFile[]
 }

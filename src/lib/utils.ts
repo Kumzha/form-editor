@@ -13,6 +13,7 @@ import { BASE_URL } from "@/constants/constants";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 export function transformToFormObject(backendObject: any): Form {
   // Transform subpoints into FormQuestion
   const transformSubpoints = (subpoints: any[]): FormQuestion[] => {
@@ -53,6 +54,7 @@ export function transformToFormObject(backendObject: any): Form {
     form_type: formType,
     name: backendObject.name || "",
     initial_context: backendObject.initial_context || [],
+    uploaded_files: backendObject.uploaded_files || [],
     points: transformPoints(backendObject.data || []),
   };
 }
@@ -86,3 +88,62 @@ export const fetchForms = async (): Promise<Form[]> => {
 
   return forms;
 };
+
+
+
+interface MongoObjectId {
+  $oid: string;
+}
+interface ObjectWithId {
+  [key: string]: any;
+}
+
+function isMongoObjectId(obj: any): obj is MongoObjectId {
+  return obj && typeof obj === 'object' && '$oid' in obj && typeof obj.$oid === 'string';
+}
+
+/**
+ * Extracts the string ID from a MongoDB ObjectId
+ * @param {any} obj - The object containing an ObjectId
+ * @param {string} field - The field name containing the ObjectId (optional)
+ * @param {string} defaultValue - Value to return if no ObjectId is found (default: '')
+ * @returns {string} The extracted ID string or defaultValue if not found
+ */
+
+export function extractObjectId(obj: any, field?: string, defaultValue: string = ''): string {
+  try {
+    // If a specific field is provided, extract from that field
+    if (field && obj && typeof obj === 'object') {
+      const fieldValue = obj[field];
+      if (isMongoObjectId(fieldValue)) {
+        return fieldValue.$oid;
+      }
+      return defaultValue;
+    }
+    
+    // If the object itself is an ObjectId
+    if (isMongoObjectId(obj)) {
+      return obj.$oid;
+    }
+    
+    return defaultValue;
+  } catch (error) {
+    console.error('Error extracting ObjectId:', error);
+    return defaultValue;
+  }
+}
+
+// Examples of usage:
+
+// Example 1: Extract from a direct ObjectId
+const objectId = { $oid: '67e2826c731bc10be41c23af' };
+const idString1 = extractObjectId(objectId);
+console.log(idString1); // '67e2826c731bc10be41c23af'
+
+// Example 2: Extract from an object with an ObjectId field
+const document = { 
+  form_id: { $oid: '67e2826c731bc10be41c23af' },
+  name: 'Sample Form'
+};
+const idString2 = extractObjectId(document, 'form_id');
+console.log(idString2); // '67e2826c731bc10be41c23af'

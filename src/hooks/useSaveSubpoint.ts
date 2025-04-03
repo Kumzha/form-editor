@@ -47,9 +47,10 @@ export const useSaveSubpoint = () => {
       console.log("Subpoint updated successfully!", data);
       toast.success("Subpoint updated successfully!");
     },
-    onError: (error) => {
+    onError: (error, data) => {
+      console.error(data)
       console.error("Error updating subpoint:", error.message);
-      // toast.error("Failed to update form");
+      toast.error("Failed to update form");
     },
   });
 
