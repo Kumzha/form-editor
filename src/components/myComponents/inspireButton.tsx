@@ -5,6 +5,7 @@ import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { BASE_URL } from "@/constants/constants";
 import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
+import { LightbulbIcon } from "lucide-react";
 
 type InspireRequestSchema = {
   user_query: string;
@@ -139,7 +140,8 @@ const InspireButton: React.FC = () => {
 
         // Only update UI if enough time has passed since last update (throttling)
         const now = Date.now();
-        if (now - lastUpdateTime >= 250) { // Reduced from 500ms to 250ms for more responsive updates
+        if (now - lastUpdateTime >= 250) {
+          // Reduced from 500ms to 250ms for more responsive updates
           handleUpdateSubpoint(accumulatedText);
           lastUpdateTime = now;
         }
@@ -147,16 +149,16 @@ const InspireButton: React.FC = () => {
 
       // Final update to ensure we have the complete text
       console.log("Final text from inspire:", finalTextRef.current);
-      
+
       // Force a direct update to Redux with the final text
       dispatch(
         updateSelectedSubpoint({
           point: targetPoint.current,
           subpoint: targetSubpoint.current,
-          content: finalTextRef.current
+          content: finalTextRef.current,
         })
       );
-      
+
       // Clean up any pending debounced updates
       if (streamDebounceTimerRef.current) {
         clearTimeout(streamDebounceTimerRef.current);
@@ -188,7 +190,9 @@ const InspireButton: React.FC = () => {
       variant="primary"
       onClick={handleInspire}
       disabled={isSubpointActive}
+      className="flex items-center gap-2 rounded-[8px]"
     >
+      <LightbulbIcon className="w-4 h-4" />
       {isSubpointActive ? "Loading..." : "Inspire"}
     </Button>
   );

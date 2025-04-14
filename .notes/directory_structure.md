@@ -1,0 +1,138 @@
+﻿# Current Directory Structure
+
+## Core Components
+
+`
+- **.notes/**
+    - directory_structure.md
+    - project_overview.md
+    - task_list.md
+- **public/**
+    - **formIcons/**
+        - LKT.svg
+    - file.svg
+    - globe.svg
+    - next.svg
+    - vercel.svg
+    - window.svg
+- **src/**
+    - **app/**
+        - **fonts/**
+            - GeistMonoVF.woff
+            - GeistVF.woff
+        - **login/**
+            - page.tsx
+        - **profile/**
+            - page.tsx
+        - **register/**
+            - page.tsx
+        - **test/**
+            - page.tsx
+        - favicon.ico
+        - globals.css
+        - layout.tsx
+        - page.tsx
+    - **components/**
+        - **blocks/**
+            - **editor-00/**
+                - editor.tsx
+                - nodes.ts
+                - plugins.tsx
+        - **editor/**
+            - **editor-ui/**
+                - content-editable.tsx
+            - **themes/**
+                - editor-theme.css
+                - editor-theme.ts
+        - **hoc/**
+            - withAuth.tsx
+        - **myComponents/**
+            - **modals/**
+                - deleteFormModal.tsx
+                - renameFormModal.tsx
+            - **sidebarButtons/**
+                - exportButton.tsx
+                - feedbackButton.tsx
+                - newForm.tsx
+                - refreshFormButton.tsx
+                - sidebarItem.tsx
+                - uploadExamplesButton.tsx
+            - appSidebar.tsx
+            - canvaDiv.tsx
+            - canvaTextArea.tsx
+            - documentCard.tsx
+            - dropDown.tsx
+            - FormEditor.tsx
+            - formList.tsx
+            - formPoints.tsx
+            - inputField.tsx
+            - inspireButton.tsx
+            - modifyButton.tsx
+            - navbar.tsx
+            - noProposalsScreen.tsx
+            - pointsField.tsx
+            - selectonPopup.tsx
+            - shrinkingDiv.tsx
+            - subpointsField.tsx
+        - **ui/**
+            - avatar.tsx
+            - badge.tsx
+            - button.tsx
+            - card.tsx
+            - checkbox.tsx
+            - context-menu.tsx
+            - dialog.tsx
+            - dropdown-menu.tsx
+            - input.tsx
+            - label.tsx
+            - navigation-menu.tsx
+            - progress.tsx
+            - radio-group.tsx
+            - select.tsx
+            - separator.tsx
+            - sheet.tsx
+            - sidebar.tsx
+            - skeleton.tsx
+            - sonner.tsx
+            - textarea.tsx
+            - tooltip.tsx
+    - **constants/**
+        - constants.ts
+    - **hooks/**
+        - use-mobile.tsx
+        - useDebouncedCallback.ts
+        - useRefreshForms.ts
+        - useSaveSubpoint.ts
+        - useUserQuery.ts
+    - **lib/**
+        - utils.ts
+    - **providers/**
+        - ReactQueryProvider.tsx
+    - **store/**
+        - **forms/**
+            - formSlice.ts
+        - **hooks/**
+        - **user/**
+            - userSlice.ts
+        - reduxProvider.tsx
+        - store.ts
+    - **styles/**
+        - markdown-preview.css
+    - **types/**
+        - formType.ts
+        - userType.ts
+    - middleware.ts
+- .cursorrules
+- .eslintrc.json
+- components.json
+- generate_structure.ps1
+- next-env.d.ts
+- next.config.js
+- package-lock.json
+- package.json
+- postcss.config.mjs
+- README.md
+- tailwind.config.ts
+- tsconfig.json
+
+`

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { setSelectedSubpoint } from "@/store/forms/formSlice";
 import InspireButton from "./inspireButton";
+import EvaluateButton from "./evaluateButton";
 import CanvaTextArea from "./canvaTextArea";
 
 const activeInspires = new Set<string>();
@@ -51,12 +52,16 @@ const SubpointsField = () => {
                   <div className="absolute -bottom-5 right-0 p-1 text-xs text-gray-500">
                     {subpointContent.length}
                   </div>
+                  {selectedSubpoint === index && (
+                    <div className="absolute bottom-2 right-2">
+                      {subpointContent ? (
+                        <EvaluateButton content={subpointContent} />
+                      ) : (
+                        <InspireButton />
+                      )}
+                    </div>
+                  )}
                 </div>
-                {selectedSubpoint === index && (
-                  <div className="absolute top-1/2 right-[-100px] transform -translate-y-1/2 flex flex-col space-y-2">
-                    {!subpointContent && <InspireButton />}
-                  </div>
-                )}
               </div>
             </div>
           );
