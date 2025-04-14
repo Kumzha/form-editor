@@ -89,8 +89,6 @@ export const fetchForms = async (): Promise<Form[]> => {
   return forms;
 };
 
-
-
 interface MongoObjectId {
   $oid: string;
 }
@@ -99,7 +97,12 @@ interface ObjectWithId {
 }
 
 function isMongoObjectId(obj: any): obj is MongoObjectId {
-  return obj && typeof obj === 'object' && '$oid' in obj && typeof obj.$oid === 'string';
+  return (
+    obj &&
+    typeof obj === "object" &&
+    "$oid" in obj &&
+    typeof obj.$oid === "string"
+  );
 }
 
 /**
@@ -110,25 +113,29 @@ function isMongoObjectId(obj: any): obj is MongoObjectId {
  * @returns {string} The extracted ID string or defaultValue if not found
  */
 
-export function extractObjectId(obj: any, field?: string, defaultValue: string = ''): string {
+export function extractObjectId(
+  obj: any,
+  field?: string,
+  defaultValue: string = ""
+): string {
   try {
     // If a specific field is provided, extract from that field
-    if (field && obj && typeof obj === 'object') {
+    if (field && obj && typeof obj === "object") {
       const fieldValue = obj[field];
       if (isMongoObjectId(fieldValue)) {
         return fieldValue.$oid;
       }
       return defaultValue;
     }
-    
+
     // If the object itself is an ObjectId
     if (isMongoObjectId(obj)) {
       return obj.$oid;
     }
-    
+
     return defaultValue;
   } catch (error) {
-    console.error('Error extracting ObjectId:', error);
+    console.error("Error extracting ObjectId:", error);
     return defaultValue;
   }
 }
@@ -136,14 +143,14 @@ export function extractObjectId(obj: any, field?: string, defaultValue: string =
 // Examples of usage:
 
 // Example 1: Extract from a direct ObjectId
-const objectId = { $oid: '67e2826c731bc10be41c23af' };
+const objectId = { $oid: "67e2826c731bc10be41c23af" };
 const idString1 = extractObjectId(objectId);
-console.log(idString1); // '67e2826c731bc10be41c23af'
+// console.log(idString1); // '67e2826c731bc10be41c23af'
 
 // Example 2: Extract from an object with an ObjectId field
-const document = { 
-  form_id: { $oid: '67e2826c731bc10be41c23af' },
-  name: 'Sample Form'
+const document = {
+  form_id: { $oid: "67e2826c731bc10be41c23af" },
+  name: "Sample Form",
 };
-const idString2 = extractObjectId(document, 'form_id');
-console.log(idString2); // '67e2826c731bc10be41c23af'
+const idString2 = extractObjectId(document, "form_id");
+// console.log(idString2); // '67e2826c731bc10be41c23af'
