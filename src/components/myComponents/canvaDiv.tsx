@@ -506,7 +506,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         contentEditableRef.current.style.height = "auto";
 
         // Add extra padding for comfortable editing (prevents hitting the bottom)
-        const extraPadding = 10; // 10px extra space at bottom
+        const extraPadding = 25; // Increased from 20 to 25 to account for the extra bottom padding
         const newHeight = Math.max(
           60,
           contentEditableRef.current.scrollHeight + extraPadding
@@ -907,7 +907,7 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         <div
           ref={contentEditableRef}
           className={cn(
-            "block whitespace-pre-wrap text-left min-h-[60px] w-full rounded-md px-3 py-2 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none bg-[#FCFAF4] overflow-hidden",
+            "block whitespace-pre-wrap text-left min-h-[60px] w-full rounded-md border px-3 py-2 pb-8 text-base placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm resize-none bg-[#FCFAF4] overflow-hidden",
             variantClasses[variant],
             className
           )}

@@ -1,6 +1,7 @@
 export interface FormQuestion {
   sub_title: string;
   prompt?: string;
+  criteria?: string;
 }
 
 export interface FormPoint {
@@ -33,5 +34,5 @@ export interface Form {
   name: string;
   initial_context: string[];
   points?: Point[];
-  uploaded_files?: AtachedFile[]
+  uploaded_files?: AtachedFile[];
 }

@@ -20,6 +20,7 @@ export function transformToFormObject(backendObject: any): Form {
     return subpoints.map((subpoint) => ({
       sub_title: subpoint.sub_title || "",
       prompt: subpoint.prompt || undefined,
+      criteria: subpoint.criteria || [],
     }));
   };
 

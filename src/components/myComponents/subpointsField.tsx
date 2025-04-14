@@ -30,6 +30,10 @@ const SubpointsField = () => {
             selectedForm?.points?.[selectedPoint]?.subpoints?.[index]
               ?.content || "";
 
+          const subpointCriteria =
+            selectedForm.form_type.questions[selectedPoint].subpoints[index]
+              .criteria || "";
+
           const inspireKey = `${selectedPoint}-${index}`;
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const isInspireActive = activeInspires.has(inspireKey);
@@ -53,11 +57,19 @@ const SubpointsField = () => {
                     {subpointContent.length}
                   </div>
                   {selectedSubpoint === index && (
-                    <div className="absolute bottom-2 right-2">
-                      {subpointContent ? (
+                    <div
+                      className="absolute bottom-2 right-2"
+                      onClick={() => console.log(subpointCriteria)}
+                    >
+                      {!subpointContent ? (
+                        <InspireButton />
+                      ) : Array.isArray(subpointCriteria) &&
+                        subpointCriteria.length === 0 ? (
+                        <></>
+                      ) : subpointCriteria ? (
                         <EvaluateButton content={subpointContent} />
                       ) : (
-                        <InspireButton />
+                        <></>
                       )}
                     </div>
                   )}

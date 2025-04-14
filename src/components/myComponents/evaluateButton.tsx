@@ -1,6 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, ClipboardCheck } from "lucide-react";
+import { Form } from "@/types/formType";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { BASE_URL } from "@/constants/constants";
 
 interface EvaluationResult {
   string: string;
@@ -10,7 +14,17 @@ interface EvaluateButtonProps {
   content: string;
 }
 
+interface EvaluationResponse {
+  result: {
+    criteria: string[];
+    insights: string[];
+  };
+}
+
 const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
+  const { selectedForm, selectedPoint, selectedSubpoint } = useSelector(
+    (state: RootState) => state.userForms
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [results, setResults] = useState<{
@@ -48,32 +62,62 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
       return;
     }
 
+    if (
+      !selectedForm ||
+      selectedPoint === undefined ||
+      selectedSubpoint === undefined
+    ) {
+      console.error("No form, point, or subpoint selected");
+      return;
+    }
+
     setIsLoading(true);
     setShowResults(false);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
 
-    // Mock response data
-    const mockResults = {
-      criteria: [
-        { string: "Clear and concise writing style" },
-        { string: "Proper grammar and punctuation" },
-        { string: "Relevant to the topic" },
-      ],
-      insights: [
-        { string: "Consider adding more specific examples" },
-        { string: "Strong opening statement" },
-        {
-          string:
-            "Could benefit from additional supporting details Could benefit from additional supporting details Could benefit from additional supporting details Could benefit from additional supporting details",
+      // Find the criteria for the selected subpoint using indices
+      const formPoint = selectedForm.form_type.questions[selectedPoint];
+      const subpointQuestion = formPoint?.subpoints[selectedSubpoint];
+      const criteria = subpointQuestion?.criteria || "";
+
+      const response = await fetch(`${BASE_URL}/evaluate-subpoint`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      ],
-    };
+        body: JSON.stringify({
+          subpoint_text: content,
+          criteria: criteria,
+          form_name: selectedForm.name,
+        }),
+      });
 
-    setResults(mockResults);
-    setIsLoading(false);
-    setShowResults(true);
+      if (!response.ok) {
+        throw new Error("Failed to evaluate subpoint");
+      }
+
+      const data = (await response.json()) as EvaluationResponse;
+
+      // Transform the response into the expected format
+      const transformedResults = {
+        criteria: data.result.criteria.map((item) => ({ string: item })),
+        insights: data.result.insights.map((item) => ({ string: item })),
+      };
+
+      setResults(transformedResults);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error evaluating subpoint:", error);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Reset results when content changes
@@ -83,24 +127,40 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
 
   return (
     <div className="relative" ref={buttonRef}>
-      <Button
-        variant="primary"
-        onClick={mockEvaluation}
-        className="flex items-center gap-2 rounded-[8px]"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Evaluating...
-          </>
-        ) : (
-          <>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="primary"
+          onClick={mockEvaluation}
+          className="flex items-center gap-2 rounded-[8px]"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Evaluating...
+            </>
+          ) : (
+            <>
+              <ClipboardCheck className="h-4 w-4" />
+              {results.criteria.length > 0 ? "Show Evaluation" : "Evaluate"}
+            </>
+          )}
+        </Button>
+
+        {results.criteria.length > 0 && (
+          <Button
+            variant="outline"
+            onClick={() => {
+              // TODO: Implement modification logic
+              console.log("Modify based on evaluation");
+            }}
+            className="flex items-center gap-2 rounded-[8px]"
+          >
             <ClipboardCheck className="h-4 w-4" />
-            {results.criteria.length > 0 ? "Show Evaluation" : "Evaluate"}
-          </>
+            Modify Based on Evaluation
+          </Button>
         )}
-      </Button>
+      </div>
 
       {showResults && (
         <div
