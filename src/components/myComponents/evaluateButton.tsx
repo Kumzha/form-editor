@@ -2,9 +2,16 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, ClipboardCheck } from "lucide-react";
 import { Form } from "@/types/formType";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { BASE_URL } from "@/constants/constants";
+import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
+import { updateSelectedSubpoint } from "@/store/forms/formSlice";
+
+// Utility type check function
+function isFormIdObject(value: any): value is { $oid: string } {
+  return value && typeof value === "object" && "$oid" in value;
+}
 
 interface EvaluationResult {
   string: string;
@@ -18,6 +25,13 @@ interface EvaluationResponse {
   result: {
     criteria: string[];
     insights: string[];
+    score: number;
+  };
+}
+
+interface UpdateSubpointResponse {
+  result: {
+    improved_text: string;
   };
 }
 
@@ -30,12 +44,16 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
   const [results, setResults] = useState<{
     criteria: EvaluationResult[];
     insights: EvaluationResult[];
+    score: number;
   }>({
     criteria: [],
     insights: [],
+    score: 0,
   });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+  const { save } = useSaveSubpoint();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -108,6 +126,7 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
       const transformedResults = {
         criteria: data.result.criteria.map((item) => ({ string: item })),
         insights: data.result.insights.map((item) => ({ string: item })),
+        score: data.result.score,
       };
 
       setResults(transformedResults);
@@ -122,8 +141,80 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
 
   // Reset results when content changes
   useEffect(() => {
-    setResults({ criteria: [], insights: [] });
+    setResults({ criteria: [], insights: [], score: 0 });
   }, [content]);
+
+  const handleModify = async () => {
+    if (
+      !selectedForm ||
+      selectedPoint === undefined ||
+      selectedSubpoint === undefined
+    ) {
+      console.error("No form, point, or subpoint selected");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(
+        `${BASE_URL}/update-subpoint-with-insights`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            subpoint_text: content,
+            form_name: selectedForm.name,
+            point: selectedPoint,
+            subpoint: selectedSubpoint,
+            criteria: results.criteria.map((item) => item.string),
+            insights: results.insights.map((item) => item.string),
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update subpoint with insights");
+      }
+
+      const data = (await response.json()) as UpdateSubpointResponse;
+
+      // Update Redux state with the improved text
+      dispatch(
+        updateSelectedSubpoint({
+          point: selectedPoint,
+          subpoint: selectedSubpoint,
+          content: data.result.improved_text,
+        })
+      );
+
+      // Save the updated content to backend
+      save(
+        data.result.improved_text,
+        selectedSubpoint,
+        selectedPoint,
+        isFormIdObject(selectedForm?.form_id)
+          ? selectedForm.form_id.$oid
+          : selectedForm?.form_id || "",
+        selectedForm?.name || ""
+      );
+
+      // Close the results dropdown
+      setShowResults(false);
+    } catch (error) {
+      console.error("Error updating subpoint with insights:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="relative" ref={buttonRef}>
@@ -150,11 +241,9 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
         {results.criteria.length > 0 && (
           <Button
             variant="outline"
-            onClick={() => {
-              // TODO: Implement modification logic
-              console.log("Modify based on evaluation");
-            }}
+            onClick={handleModify}
             className="flex items-center gap-2 rounded-[8px]"
+            disabled={isLoading}
           >
             <ClipboardCheck className="h-4 w-4" />
             Modify Based on Evaluation
@@ -167,6 +256,22 @@ const EvaluateButton: React.FC<EvaluateButtonProps> = ({ content }) => {
           ref={dropdownRef}
           className="absolute right-0 top-[calc(100%+0.5rem)] w-[600px] bg-white rounded-lg shadow-lg border border-gray-200 z-50"
         >
+          <div className="p-4 border-b">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Evaluation Results</h3>
+              <div
+                className={`text-md font-bold ${
+                  results.score < 50
+                    ? "text-red-500"
+                    : results.score < 70
+                    ? "text-yellow-500"
+                    : "text-green-500"
+                }`}
+              >
+                Score: {results.score}
+              </div>
+            </div>
+          </div>
           <div className="max-h-[400px] overflow-y-auto">
             <table className="w-full border-collapse">
               <thead className="bg-gray-50 sticky top-0">
