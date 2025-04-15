@@ -9,8 +9,13 @@ import { useSaveSubpoint } from "@/hooks/useSaveSubpoint";
 import { updateSelectedSubpoint } from "@/store/forms/formSlice";
 
 // Utility type check function
-function isFormIdObject(value: any): value is { $oid: string } {
-  return value && typeof value === "object" && "$oid" in value;
+function isFormIdObject(value: unknown): value is { $oid: string } {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "$oid" in value &&
+    typeof (value as { $oid: unknown }).$oid === "string"
+  );
 }
 
 interface EvaluationResult {
