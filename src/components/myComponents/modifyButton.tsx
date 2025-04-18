@@ -21,6 +21,7 @@ interface ModifyProps {
   index: number;
   onInputFocus?: (focused: boolean) => void;
   onApply?: () => void;
+  onModificationComplete?: () => void;
 }
 
 type UpdateFieldRequest = {
@@ -72,6 +73,7 @@ const ModifyButton: React.FC<ModifyProps> = ({
   subpointIndex,
   onInputFocus,
   onApply,
+  onModificationComplete,
 }) => {
   const dispatch = useDispatch();
 
@@ -108,16 +110,16 @@ const ModifyButton: React.FC<ModifyProps> = ({
     },
     onSuccess: (data) => {
       // Find any highlighted text span in the document
-      const highlightedSpan = document.querySelector('.bg-blue-600.text-white');
-      
+      const highlightedSpan = document.querySelector(".bg-blue-600.text-white");
+
       if (highlightedSpan) {
         // Replace only the highlighted text with the API result
         highlightedSpan.textContent = data.result;
-        
+
         // After replacing the text, get the updated full content
         const parentElement = highlightedSpan.parentElement;
         const updatedContent = parentElement?.textContent || subpointText;
-        
+
         // Update Redux with the full updated content
         dispatch(
           updateSelectedSubpoint({
@@ -137,12 +139,17 @@ const ModifyButton: React.FC<ModifyProps> = ({
             : selectedForm?.form_id || "",
           selectedForm?.name || ""
         );
-        
+
         // Remove the highlight styling after applying
         const spanParent = highlightedSpan.parentNode;
         if (spanParent) {
           const textNode = document.createTextNode(data.result);
           spanParent.replaceChild(textNode, highlightedSpan);
+        }
+
+        // Notify that modification is complete
+        if (onModificationComplete) {
+          onModificationComplete();
         }
       } else {
         // Fallback to original behavior if no highlight span is found
@@ -163,6 +170,11 @@ const ModifyButton: React.FC<ModifyProps> = ({
             : selectedForm?.form_id || "",
           selectedForm?.name || ""
         );
+
+        // Notify that modification is complete
+        if (onModificationComplete) {
+          onModificationComplete();
+        }
       }
     },
     onError: (error) => {
@@ -195,10 +207,10 @@ const ModifyButton: React.FC<ModifyProps> = ({
 
     // Trigger the mutation
     modifyMutation.mutate(data);
-    
+
     // Clear input after submitting
     setUserPrompt("");
-    
+
     // Call onApply callback if it exists
     if (onApply) {
       onApply();

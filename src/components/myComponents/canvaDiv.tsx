@@ -392,6 +392,10 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
       null
     );
     const [plainText, setPlainText] = useState<string>(defaultValue);
+    const [modificationHistory, setModificationHistory] = useState<
+      { text: string; timestamp: number }[]
+    >([]);
+    const [hasModification, setHasModification] = useState(false);
     const isInitialMount = useRef(true);
 
     useEffect(() => {
@@ -669,6 +673,12 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
         // Store current content
         const currentContent = contentEditableRef.current.textContent || "";
 
+        // Add to history before modification
+        setModificationHistory((prev) => [
+          ...prev,
+          { text: currentContent, timestamp: Date.now() },
+        ]);
+
         // Split the text into three parts: before, highlighted, and after
         const beforeText = currentContent.substring(0, highlightRange.start);
         const highlightedText = currentContent.substring(
@@ -685,9 +695,49 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
 
         // Update text state to match the current content
         setPlainText(currentContent);
+        setHasModification(true);
       }
 
       isHighlightingRef.current = false;
+    };
+
+    // Add undo function
+    const handleUndo = () => {
+      if (modificationHistory.length === 0) return;
+
+      const lastModification =
+        modificationHistory[modificationHistory.length - 1];
+      const newHistory = modificationHistory.slice(0, -1);
+
+      if (contentEditableRef.current) {
+        // Update the DOM first
+        contentEditableRef.current.textContent = lastModification.text;
+
+        // Then update Redux state
+        dispatch(
+          updateSelectedSubpoint({
+            point: selectedPoint,
+            subpoint: index,
+            content: lastModification.text,
+          })
+        );
+
+        // Save to backend
+        save(
+          lastModification.text,
+          index,
+          selectedPoint,
+          isFormIdObject(selectedForm?.form_id)
+            ? selectedForm.form_id.$oid
+            : selectedForm?.form_id || "",
+          selectedForm?.name || ""
+        );
+
+        // Update local state
+        setPlainText(lastModification.text);
+        setModificationHistory(newHistory);
+        setHasModification(false);
+      }
     };
 
     const clickPopup = () => {
@@ -932,6 +982,8 @@ const CanvaDiv = forwardRef<CanvaDivRef, CanvaDivProps>(
             onClose={handleClosePopup}
             onApply={clickPopup}
             onInputFocus={handleInputFocus}
+            onUndo={handleUndo}
+            canUndo={hasModification}
           />
         )}
       </div>

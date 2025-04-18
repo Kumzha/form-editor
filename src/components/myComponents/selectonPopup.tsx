@@ -16,6 +16,8 @@ interface SelectionPopupProps {
   reselectText?: () => boolean;
   onApply?: () => void;
   onInputFocus?: (focused: boolean) => void;
+  onUndo?: () => void;
+  canUndo?: boolean;
 }
 
 export const SelectionPopup: FC<SelectionPopupProps> = ({
@@ -27,6 +29,8 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
   subpointText,
   onApply,
   onInputFocus,
+  onUndo,
+  canUndo,
 }) => {
   const popupRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{
@@ -34,6 +38,7 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
     left: number;
   } | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [showUndoButton, setShowUndoButton] = useState(false);
 
   const { selectedForm, selectedPoint } = useSelector(
     (state: RootState) => state.userForms
@@ -157,6 +162,10 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
   //   e.stopPropagation();
   // };
 
+  const handleModificationComplete = () => {
+    setShowUndoButton(true);
+  };
+
   // The actual popup component
   const popupElement = (
     <div
@@ -178,28 +187,72 @@ export const SelectionPopup: FC<SelectionPopupProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
           transition={{ duration: 0.3 }}
-          className="flex gap-1 items-center"
+          className="flex flex-col gap-2"
           onClick={(e) => e.stopPropagation()} // Stop propagation here too
         >
-          <div
-            className="w-full"
-            onClick={(e) => {
-              e.stopPropagation(); // Stop event propagation
-              handleApply(e);
-            }}
-            onMouseDown={(e) => e.stopPropagation()} // Prevent selection cancellation
-          >
-            <ModifyButton
-              subpointText={subpointText}
-              selectedText={selectedText}
-              query={prompt}
-              subpointIndex={index}
-              formName={formName}
-              index={index}
-              onApply={onApply}
-              onInputFocus={onInputFocus}
-            />
-          </div>
+          {!showUndoButton && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
+              onClick={(e) => {
+                e.stopPropagation(); // Stop event propagation
+                handleApply(e);
+              }}
+              onMouseDown={(e) => e.stopPropagation()} // Prevent selection cancellation
+            >
+              <ModifyButton
+                subpointText={subpointText}
+                selectedText={selectedText}
+                query={prompt}
+                subpointIndex={index}
+                formName={formName}
+                index={index}
+                onApply={onApply}
+                onInputFocus={onInputFocus}
+                onModificationComplete={handleModificationComplete}
+              />
+            </motion.div>
+          )}
+          {canUndo && showUndoButton && (
+            <motion.div
+              key="undo-button"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3 }}
+              className="flex justify-center"
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onUndo) {
+                    onUndo();
+                    setShowUndoButton(false);
+                  }
+                }}
+                className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                  />
+                </svg>
+                Undo
+              </button>
+            </motion.div>
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
